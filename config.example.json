@@ -1,0 +1,14 @@
+{
+  "spotify_client_id": "COLE_AQUI_O_CLIENT_ID_DO_SEU_APP_SPOTIFY",
+  "redirect_uri": "http://127.0.0.1:8888/callback",
+  "playlists": [
+    "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M",
+    "liked"
+  ],
+  "library_dirs": ["~/Music"],
+  "output_dir": "saida",
+  "convert_to_mp3": true,
+  "mp3_bitrate": "192k",
+  "downloader_command": [],
+  "download_dir": "downloads"
+}

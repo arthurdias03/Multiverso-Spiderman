@@ -1,0 +1,6 @@
+config.json
+.spotify_token.json
+saida/
+downloads/
+__pycache__/
+*.pyc

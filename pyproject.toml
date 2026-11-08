@@ -1,0 +1,12 @@
+[project]
+name = "trex-sync"
+version = "0.1.0"
+description = "Espelha playlists do Spotify em pastas de MP3 prontas para o Amazfit T-Rex 3"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+tags = ["mutagen>=1.47"]
+
+[project.scripts]
+trex-sync = "trex_sync.__main__:main"
