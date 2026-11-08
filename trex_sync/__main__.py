@@ -107,7 +107,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("sync", help="gera a pasta com as músicas novas de cada playlist")
     sub.add_parser("confirmar", help="marca as pendentes como já transferidas para o relógio")
     sub.add_parser("status", help="mostra o estado por playlist")
-    sv = sub.add_parser("servir", help="serve as músicas para o app T-Rex Music do relógio")
+    sv = sub.add_parser("servir", help="serve as músicas para o app spotifiBR do relógio")
     sv.add_argument("--port", type=int, default=0)
     sv.add_argument("--sync", action="store_true", help="roda o sync antes de servir")
     sub.add_parser("novo-token", help="gera um novo token do servidor (invalida o antigo)")

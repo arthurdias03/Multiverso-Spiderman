@@ -2,7 +2,7 @@
   "configVersion": "v3",
   "app": {
     "appId": 1098765,
-    "appName": "T-Rex Music",
+    "appName": "spotifiBR",
     "appType": "app",
     "version": { "code": 1, "name": "0.1.0" },
     "icon": "icon.png",
@@ -31,8 +31,8 @@
     }
   },
   "i18n": {
-    "pt-BR": { "appName": "T-Rex Music" },
-    "en-US": { "appName": "T-Rex Music" }
+    "pt-BR": { "appName": "spotifiBR" },
+    "en-US": { "appName": "spotifiBR" }
   },
   "defaultLanguage": "en-US"
 }

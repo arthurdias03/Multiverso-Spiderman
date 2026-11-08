@@ -259,7 +259,7 @@ def serve(directory: Path, port: int, token: str, bind: str = "auto", allow_publ
     scheme = "https" if tls_cert else "http"
     shown = lan_ip() if host in ("0.0.0.0", "::") else host
     print(f"Servindo {directory} em {scheme}://{shown}:{port}  (só manifest.json e as músicas dele)")
-    print("No app Zepp > T-Rex Music > Configurações, use:")
+    print("No app Zepp > spotifiBR > Configurações, use:")
     print(f"   Endereço: {scheme}://{shown}:{port}")
     print(f"   Token:    {token}")
     print("Não compartilhe o token. Para trocar: python -m trex_sync novo-token")

@@ -6,8 +6,11 @@ import { BaseSideService, settingsLib } from '@zeppos/zml/base-side'
 import { checkServerUrl, checkToken, sanitizeManifest, isValidId, isSafeRelPath, encodePath } from '../lib/validate'
 
 const TOKEN_HEADER = 'X-Trex-Token'
+const MAX_ATTEMPTS = 3
+const RETRY_DELAY_MS = 5000
 
 const state = {
+  cancelled: false,
   queue: [],
   busy: false,
   current: null, // { download, file }
@@ -70,6 +73,7 @@ AppSideService(
       state.queue.forEach((i) => (known[i.id] = true))
       if (state.current) known[state.current.id] = true
       const fresh = items.filter((i) => !known[i.id])
+      state.cancelled = false
       state.queue = state.queue.concat(fresh)
       state.total += fresh.length
       if (!state.busy) this.processNext()
@@ -77,6 +81,7 @@ AppSideService(
     },
 
     cancelAll() {
+      state.cancelled = true
       state.queue = []
       if (state.current) {
         try {
@@ -120,7 +125,17 @@ AppSideService(
       }
       const cur = { id: item.id }
       state.current = cur
-      const fail = (msg) => {
+      // Falha transitória (rede/Bluetooth) => até MAX_ATTEMPTS tentativas com espera crescente.
+      // Erro definitivo (401/403/404) => desiste na hora. Nada se perde: o que faltar volta na próxima sincronização.
+      const fail = (msg, permanent) => {
+        if (state.current !== cur) return
+        state.current = null
+        item.attempts = (item.attempts || 1) + 1
+        if (!permanent && item.attempts <= MAX_ATTEMPTS && !state.cancelled) {
+          this.notify({ id: item.id, stage: `nova tentativa ${item.attempts}/${MAX_ATTEMPTS}` })
+          state.queue.unshift(item)
+          return setTimeout(() => this.processNext(), RETRY_DELAY_MS * (item.attempts - 1))
+        }
         state.done++
         this.notify({ id: item.id, error: msg })
         this.processNext()
@@ -142,7 +157,9 @@ AppSideService(
       }
       task.onFail = (ev) => fail(`download falhou (${ev && ev.code})`)
       task.onSuccess = (ev) => {
-        if (ev.statusCode && ev.statusCode !== 200) return fail(`HTTP ${ev.statusCode}`)
+        if (ev.statusCode && ev.statusCode !== 200) {
+          return fail(`HTTP ${ev.statusCode}`, [401, 403, 404].indexOf(ev.statusCode) >= 0)
+        }
         const path = ev.filePath || ev.tempFilePath || `data://download/${item.id}.mp3`
         let file
         try {
@@ -164,11 +181,13 @@ AppSideService(
         file.on('change', (e) => {
           const st = e.data && e.data.readyState
           if (st === 'transferred') {
+            if (state.current !== cur) return
+            state.current = null
             state.done++
             this.notify({ id: item.id, stage: 'ok' })
             this.processNext()
           } else if (st === 'error' || st === 'canceled') {
-            if (state.current === cur) fail(`envio ${st}`)
+            fail(`envio ${st}`, st === 'canceled')
           }
         })
       }

@@ -47,7 +47,7 @@ Page(
     },
 
     build() {
-      title('T-Rex Music')
+      title('spotifiBR')
       this.state.status = label('', 84, 70, { wrap: true, size: 22 })
       button('Sincronizar', 160, () => this.sync(), {
         color: COLOR.accent, pressColor: COLOR.accentPressed, textColor: 0x000000,

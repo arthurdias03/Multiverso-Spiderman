@@ -1,20 +1,24 @@
-# trex-sync + T-Rex Music: playlists do Spotify offline no Amazfit T-Rex 3
+# trex-sync + spotifiBR: playlists do Spotify offline no Amazfit T-Rex 3
+
+![Telas do spotifiBR](docs/telas/telas.png)
+
+**Guia de uso passo a passo: [COMO_USAR.md](COMO_USAR.md)**
 
 O projeto tem duas partes:
 
 | Parte | Pasta | O que faz |
 |---|---|---|
 | **trex-sync** (PC, Python) | `trex_sync/` | Lê suas playlists no Spotify, monta uma pasta de MP3 por playlist e serve tudo por HTTP (`servir`) |
-| **T-Rex Music** (relógio, Zepp OS) | `zepp-app/` | Ao abrir no relógio, baixa só as músicas novas pelo app Zepp e toca offline, inclusive em segundo plano. Veja [`zepp-app/README.md`](zepp-app/README.md) |
+| **spotifiBR** (relógio, Zepp OS) | `zepp-app/` | Ao abrir no relógio, baixa só as músicas novas pelo app Zepp e toca offline, inclusive em segundo plano. Veja [`zepp-app/README.md`](zepp-app/README.md) |
 
-Com o app do relógio instalado, o fluxo vira: `python -m trex_sync servir --sync` no PC → abrir o T-Rex Music no relógio. O passo manual de transferir pelo app Zepp e o `confirmar` deixam de existir.
+Com o app do relógio instalado, o fluxo vira: `python -m trex_sync servir --sync` no PC → abrir o spotifiBR no relógio. O passo manual de transferir pelo app Zepp e o `confirmar` deixam de existir.
 
 ## Limites (leia antes)
 
 | Limite | Causa | Consequência |
 |---|---|---|
 | Não baixa o áudio do Spotify | As músicas baixadas no Spotify são criptografadas e só tocam no app dele. Não há API para exportá-las | Os MP3 vêm da **sua biblioteca local** (ou de um downloader externo configurado por você) |
-| Não grava no player nativo do relógio | Mini-apps não acessam a biblioteca de música do sistema | O app **T-Rex Music** (`zepp-app/`) tem player próprio e sincroniza sozinho ao ser aberto. Sem ele, o envio é manual pelo app Zepp |
+| Não grava no player nativo do relógio | Mini-apps não acessam a biblioteca de música do sistema | O app **spotifiBR** (`zepp-app/`) tem player próprio e sincroniza sozinho ao ser aberto. Sem ele, o envio é manual pelo app Zepp |
 
 ## Como funciona
 
@@ -56,7 +60,7 @@ python -m trex_sync sync        # gera saida/_PARA_TRANSFERIR com as faixas nova
 #    Perfil > T-Rex 3 > Música > Transferir (relógio no Wi-Fi acelera)
 python -m trex_sync confirmar   # marca como transferidas; o próximo sync só traz novidades
 python -m trex_sync status
-python -m trex_sync servir --sync   # para o app T-Rex Music do relógio (mesmo Wi-Fi do celular)
+python -m trex_sync servir --sync   # para o app spotifiBR do relógio (mesmo Wi-Fi do celular)
 ```
 
 Para o app do relógio, use `mp3_bitrate` de 96k a 128k: a transferência por Bluetooth é lenta. O token do servidor é gerado automaticamente (`python -m trex_sync novo-token` troca). Veja [SECURITY.md](SECURITY.md) para o modelo de segurança e o acesso cifrado via Tailscale.

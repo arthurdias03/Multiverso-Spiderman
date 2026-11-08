@@ -7,7 +7,7 @@ import * as appServiceMgr from '@zos/app-service'
 import { readFileSync, writeFileSync } from '@zos/fs'
 import { log } from '@zos/utils'
 
-const logger = log.getLogger('trex-music-service')
+const logger = log.getLogger('spotifibr-service')
 const QUEUE_FILE = 'queue.json'
 const NOW_FILE = 'now.json'
 

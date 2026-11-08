@@ -20,7 +20,7 @@ AppSettingsPage({
 
     return Section({}, [
       View({ style: { padding: '16px' } }, [
-        Text({ bold: true, paragraph: true }, ['T-Rex Music']),
+        Text({ bold: true, paragraph: true }, ['spotifiBR']),
         Text({ paragraph: true, style: { color: '#666', fontSize: '14px' } }, [
           'Rode "python -m trex_sync servir" no computador e copie o endereço e o token mostrados.',
         ]),

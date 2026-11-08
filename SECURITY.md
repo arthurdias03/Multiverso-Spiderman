@@ -1,4 +1,4 @@
-# Segurança: trex-sync + T-Rex Music
+# Segurança: trex-sync + spotifiBR
 
 ## O que proteger
 
