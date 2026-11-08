@@ -2,7 +2,7 @@
 
 ![Telas do spotifiBR](docs/telas/telas.png)
 
-**Guia de uso passo a passo: [COMO_USAR.md](COMO_USAR.md)**
+**Guia de uso passo a passo: [COMO_USAR.md](COMO_USAR.md)** · 🎬 [Vídeo de apresentação](docs/video/spotifibr-apresentacao.mp4)
 
 O projeto tem duas partes:
 

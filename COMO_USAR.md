@@ -2,6 +2,8 @@
 
 ![Telas do spotifiBR](docs/telas/telas.png)
 
+🎬 **Vídeo de apresentação (2 min):** [docs/video/spotifibr-apresentacao.mp4](docs/video/spotifibr-apresentacao.mp4)
+
 ## Resumo em uma frase
 
 O **Spotify diz quais músicas** vão para o relógio (suas playlists). **O áudio vem de arquivos seus**, e o spotifiBR leva só as novidades ao relógio sempre que você abre o app.
