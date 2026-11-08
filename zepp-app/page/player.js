@@ -1,23 +1,25 @@
 import { onKey, KEY_UP, KEY_DOWN, KEY_EVENT_CLICK } from '@zos/interaction'
-import { COLOR } from '../lib/constants'
-import { title, label, button, setText } from '../lib/ui'
+import { COLOR, IMG } from '../lib/constants'
+import { text, image, imageButton, setText, remove, coverFor } from '../lib/ui'
 import { currentState, jump, pause, resume } from '../lib/player-control'
 
+// Layout "tocando agora" (480x480 redondo): origem -> capa -> título/artista -> controles -> posição
 Page({
-  state: { w: {} },
+  state: { w: {}, playing: null },
 
   build() {
     const w = this.state.w
-    w.title = title('Tocando')
-    w.track = label('', 120, 110, { size: 32, color: COLOR.text, wrap: true })
-    w.artist = label('', 232, 44, { size: 24 })
-    w.pos = label('', 280, 36, { size: 20 })
+    const { queue } = currentState()
+    w.from = text({ x: 120, y: 30, w: 240, h: 22, text: 'TOCANDO DE', size: 15, color: COLOR.sub })
+    w.list = text({ x: 90, y: 52, w: 300, h: 30, text: queue.title || 'Fila', size: 20 })
+    w.cover = image(170, 92, coverFor(queue.playlistId || queue.title, 140))
+    w.title = text({ x: 50, y: 244, w: 380, h: 42, size: 28 })
+    w.artist = text({ x: 70, y: 286, w: 340, h: 30, size: 20, color: COLOR.sub })
 
-    button('<<', 330, () => this.cmd(jump.bind(null, -1)), { x: 70, w: 100 })
-    w.toggle = button('Pausar', 330, () => this.toggle(), {
-      x: 180, w: 120, color: COLOR.accent, pressColor: COLOR.accentPressed, textColor: 0x000000,
-    })
-    button('>>', 330, () => this.cmd(jump.bind(null, 1)), { x: 310, w: 100 })
+    imageButton(108, 346, 64, IMG.prev, IMG.prevP, () => this.cmd(jump.bind(null, -1)))
+    imageButton(308, 346, 64, IMG.next, IMG.nextP, () => this.cmd(jump.bind(null, 1)))
+    w.pos = text({ x: 150, y: 436, w: 180, h: 24, size: 16, color: COLOR.sub })
+    w.shuffleIcon = null
 
     // botões físicos: cima = anterior, baixo = próxima
     try {
@@ -35,15 +37,18 @@ Page({
     this.refresh()
   },
 
+  drawToggle(playing) {
+    if (this.state.playing === playing) return
+    this.state.playing = playing
+    remove(this.state.w.toggle)
+    this.state.w.toggle = playing
+      ? imageButton(192, 330, 96, IMG.pause, IMG.pauseP, () => this.cmd(pause))
+      : imageButton(192, 330, 96, IMG.play, IMG.playP, () => this.cmd(resume))
+  },
+
   cmd(fn) {
     fn(() => this.refresh())
     this.refresh()
-  },
-
-  toggle() {
-    const { now } = currentState()
-    if (now.playing) this.cmd(pause)
-    else this.cmd(resume)
   },
 
   refresh() {
@@ -51,11 +56,10 @@ Page({
     const w = this.state.w
     const items = queue.items || []
     const item = items[now.index || 0]
-    setText(w.title, queue.title || 'Tocando')
-    setText(w.track, item ? item.t : 'Nada na fila')
-    setText(w.artist, item ? item.a : '')
-    setText(w.pos, items.length ? `${(now.index || 0) + 1} / ${items.length}` : '')
-    setText(w.toggle, now.playing ? 'Pausar' : 'Tocar')
+    setText(w.title, item ? item.t : 'Nada tocando')
+    setText(w.artist, item ? item.a : 'Escolha uma playlist')
+    setText(w.pos, items.length ? `${queue.shuffle ? 'Aleatório · ' : ''}${(now.index || 0) + 1} de ${items.length}` : '')
+    this.drawToggle(!!now.playing)
   },
 
   onResume() {

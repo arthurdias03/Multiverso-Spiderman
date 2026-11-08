@@ -2,52 +2,75 @@ import { createWidget, deleteWidget, widget, align, prop, text_style } from '@zo
 import { px } from '@zos/utils'
 import { COLOR } from './constants'
 
-// Tela redonda 480x480: conteúdo numa coluna central de 360px
-export const W = 480
-export const COL_X = px(60)
-export const COL_W = px(360)
+export { align, prop }
 
-export function title(text, y = 28) {
+const COVER_COUNT = 6
+
+/** Capa com gradiente escolhida de forma estável pelo id da playlist. */
+export function coverFor(id, size) {
+  let h = 0
+  for (const ch of String(id || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0
+  return `covers/c${h % COVER_COUNT}_${size}.png`
+}
+
+/** Converte a lista de tipos por item em data_type_config (intervalos fechados [start, end]). */
+export function typeRanges(types) {
+  const out = []
+  types.forEach((t, i) => {
+    const last = out[out.length - 1]
+    if (last && last.type_id === t && last.end === i - 1) last.end = i
+    else out.push({ start: i, end: i, type_id: t })
+  })
+  return out
+}
+
+/** Cria/atualiza um SCROLL_LIST a partir de [{ type, data, onClick }]. */
+export function renderList(state, base, items, onClick) {
+  const payload = {
+    data_array: items.map((i) => i.data),
+    data_count: items.length,
+    data_type_config: typeRanges(items.map((i) => i.type)),
+    data_type_config_count: 0,
+  }
+  payload.data_type_config_count = payload.data_type_config.length
+  if (!state.list) {
+    state.list = createWidget(widget.SCROLL_LIST, {
+      ...base,
+      ...payload,
+      item_click_func: (list, index, key) => onClick(index, key),
+    })
+  } else {
+    state.list.setProperty(prop.UPDATE_DATA, { ...payload, on_page: 1 })
+  }
+}
+
+export function text(o) {
   return createWidget(widget.TEXT, {
-    x: px(40), y: px(y), w: px(400), h: px(50),
-    text, text_size: px(34), color: COLOR.accent,
-    align_h: align.CENTER_H, align_v: align.CENTER_V, text_style: text_style.ELLIPSIS,
+    x: px(o.x), y: px(o.y), w: px(o.w), h: px(o.h),
+    text: o.text || '', text_size: px(o.size || 24), color: o.color == null ? COLOR.text : o.color,
+    align_h: o.align === 'left' ? align.LEFT : align.CENTER_H, align_v: align.CENTER_V,
+    text_style: o.wrap ? text_style.WRAP : text_style.ELLIPSIS,
   })
 }
 
-export function label(text, y, h = 40, opts = {}) {
-  return createWidget(widget.TEXT, {
-    x: opts.x != null ? px(opts.x) : COL_X, y: px(y), w: opts.w != null ? px(opts.w) : COL_W, h: px(h),
-    text, text_size: px(opts.size || 24), color: opts.color || COLOR.muted,
-    align_h: align.CENTER_H, align_v: align.CENTER_V,
-    text_style: opts.wrap ? text_style.WRAP : text_style.ELLIPSIS,
-  })
+export function image(x, y, src) {
+  return createWidget(widget.IMG, { x: px(x), y: px(y), src })
 }
 
-export function button(text, y, onClick, opts = {}) {
+export function imageButton(x, y, size, src, pressSrc, onClick) {
   return createWidget(widget.BUTTON, {
-    x: opts.x != null ? px(opts.x) : COL_X, y: px(y), w: opts.w != null ? px(opts.w) : COL_W, h: px(opts.h || 68),
-    radius: px(opts.radius || 34),
-    normal_color: opts.color || COLOR.item,
-    press_color: opts.pressColor || COLOR.itemPressed,
-    color: opts.textColor || COLOR.text,
-    text_size: px(opts.size || 26),
-    text,
-    click_func: onClick,
+    x: px(x), y: px(y), w: px(size), h: px(size), normal_src: src, press_src: pressSrc, click_func: onClick,
   })
 }
 
-export function setText(w, text) {
+export function setText(w, value) {
   try {
-    w && w.setProperty(prop.TEXT, text)
+    w && w.setProperty(prop.TEXT, value)
   } catch (e) {}
 }
 
-export function remove(widgets) {
-  for (const w of widgets) {
-    try {
-      deleteWidget(w)
-    } catch (e) {}
-  }
-  widgets.length = 0
+export function remove(w) {
+  try {
+    w && deleteWidget(w)
+  } catch (e) {}
 }

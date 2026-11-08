@@ -20,9 +20,11 @@ PC: python -m trex_sync servir ──HTTP (Wi-Fi)──> Celular: app Zepp (side
 
 | Pasta | Onde roda | Função |
 |---|---|---|
-| `page/home.js` | relógio | sincronização + lista de playlists |
-| `page/playlist.js` | relógio | faixas, Tocar / Aleatório |
-| `page/player.js` | relógio | tocando agora, anterior/pausar/próxima (botões físicos cima/baixo) |
+| `page/home.js` | relógio | biblioteca: status da sincronização, "tocando agora", playlists com capa |
+| `page/playlist.js` | relógio | capa, Aleatório/Play, faixas (verde = tocando, cinza = baixando) |
+| `page/player.js` | relógio | tocando agora: capa, título, anterior/play-pause/próxima (botões físicos cima/baixo) |
+| `lib/ui.js`, `lib/constants.js` | relógio | tema (paleta, ícones, capas) e lista nativa `SCROLL_LIST` |
+| `tools/make-assets.cjs` | PC | gera ícones, botões e capas (`assets/common.r/`) a partir de SVG |
 | `app-service/player_service.js` | relógio (segundo plano) | player `@zos/media` |
 | `lib/storage.js` | relógio | biblioteca local, diferenças e arquivos |
 | `app-side/index.js` | celular (app Zepp) | busca o manifesto, baixa e transfere a fila |
@@ -61,6 +63,10 @@ Funciona pelo **modo desenvolvedor do app Zepp**, que existe também no iOS. Nã
 1. No PC, depois de adicionar músicas no Spotify: `python -m trex_sync servir --sync`.
 2. No relógio, abra o **spotifiBR**. Ele baixa as novas sozinho. Deixe o app aberto até aparecer "Sincronização concluída" (a tela fica acesa durante a transferência).
 3. Escolha uma playlist e toque **Tocar** ou **Aleatório**. Conecte os fones Bluetooth antes, pelo menu do próprio relógio.
+
+## Visual
+
+Tela redonda 480×480, fundo preto, cartões grafite e destaque verde. As listas usam o `SCROLL_LIST` nativo do Zepp OS, que recicla itens e aguenta milhares de faixas. Capas em gradiente são escolhidas de forma estável por playlist. Ícones: [Material Icons](https://fonts.google.com/icons) (Apache License 2.0). Para regenerar as imagens: `node tools/make-assets.cjs` (precisa do Playwright).
 
 ## Testes
 

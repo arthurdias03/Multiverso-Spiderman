@@ -50,9 +50,10 @@ function stopService(done) {
   })
 }
 
-/** queue: [{ f, t, a }] ; index: posição inicial */
-export function playQueue(queue, index, title, done) {
-  writeJSON(QUEUE_FILE, { title, items: queue })
+/** queue: [{ f, t, a }] ; index: posição inicial ; meta: { title, playlistId, shuffle } */
+export function playQueue(queue, index, meta, done) {
+  const m = typeof meta === 'string' ? { title: meta } : meta || {}
+  writeJSON(QUEUE_FILE, { title: m.title || '', playlistId: m.playlistId || '', shuffle: !!m.shuffle, items: queue })
   writeJSON(NOW_FILE, { index, playing: true })
   withPermission((ok) => {
     if (!ok) return done && done(false, 'Permissão de serviço negada')
@@ -62,6 +63,7 @@ export function playQueue(queue, index, title, done) {
 
 export function currentState() {
   const q = readJSON(QUEUE_FILE, { title: '', items: [] })
+  if (!Array.isArray(q.items)) q.items = []
   const now = readJSON(NOW_FILE, { index: 0, playing: false })
   now.playing = now.playing && isRunning()
   return { queue: q, now }
