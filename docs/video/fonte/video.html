@@ -45,18 +45,28 @@
   .bul{display:flex;gap:22px;align-items:flex-start;font-size:34px;line-height:1.35}
   .bul .dot{width:18px;height:18px;border-radius:50%;background:var(--green);margin-top:16px;flex:none}
   .bul small{display:block;color:var(--sub);font-size:26px;margin-top:4px}
+
+  .trex{position:relative;aspect-ratio:600/780;flex:none}
+  .trex svg{position:absolute;inset:0;width:100%;height:100%}
+  .trex .scr{position:absolute;left:17.5%;top:25%;width:65%;height:50%;border-radius:50%;object-fit:cover}
+  .trex .glare{position:absolute;left:17.5%;top:25%;width:65%;height:50%;border-radius:50%;background:radial-gradient(120% 80% at 30% 10%,rgba(255,255,255,.10),rgba(255,255,255,0) 45%);pointer-events:none}
+  .pc{background:#0b0d10;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 30px 60px #0007}
+  .pc .bar{height:34px;background:#1c2026;display:flex;align-items:center;gap:8px;padding:0 14px}
+  .pc .bar i{width:12px;height:12px;border-radius:50%;background:#3a4048;display:block}
+  .pc .bar span{margin-left:12px;font-size:15px;color:#8b95a1;font-family:"DejaVu Sans Mono",monospace}
+  .pc img{display:block;width:100%}
 </style></head><body>
 
 <!-- 1. Abertura -->
 <section class="scene" data-start="0" data-end="7" style="justify-content:center">
   <div class="row" style="justify-content:space-between">
-    <div style="max-width:980px">
+    <div style="max-width:1000px">
       <img src="img/icon.png" style="width:150px;height:150px;margin-bottom:36px" data-in="0.2" data-anim="scale">
       <h1 data-in="0.5">spotifi<span class="accent">BR</span></h1>
       <p class="lead" data-in="0.9" style="font-size:42px">Suas playlists do Spotify, <span class="accent">offline</span> no <span style="white-space:nowrap">Amazfit T-Rex 3</span>.</p>
-      <p class="lead" data-in="1.5" style="margin-top:30px">Como funciona · Como instalar · Como usar</p>
+      <p class="lead" data-in="1.5" style="margin-top:30px">App no relógio + spotifiBR Desktop no computador</p>
     </div>
-    <img class="watch" src="img/tela-5.png" style="width:560px;height:560px" data-in="0.7" data-anim="scale">
+    <div class="trex" data-screen="img/screen-5.png" style="width:600px;margin:-60px 0" data-in="0.7" data-anim="scale"></div>
   </div>
 </section>
 
@@ -72,7 +82,7 @@
       <div class="node" style="height:190px" data-in="1.8"><div class="ic" style="font-size:52px">💽</div><b>Seus arquivos</b><span>MP3, FLAC, M4A</span></div>
     </div>
     <div class="arrow" data-in="2.6" data-anim="grow"></div>
-    <div class="node" data-in="3.0"><div class="ic">💻</div><b>Computador</b><span>trex-sync casa a playlist com os arquivos</span></div>
+    <div class="node" data-in="3.0"><div class="ic">💻</div><b>spotifiBR Desktop</b><span>casa a playlist com os arquivos, sozinho</span></div>
     <div class="arrow" data-in="3.8" data-anim="grow"></div>
     <div class="node" data-in="4.2"><div class="ic">📱</div><b>iPhone</b><span>app Zepp leva os arquivos pelo Wi-Fi</span></div>
     <div class="arrow" data-in="5.0" data-anim="grow"></div>
@@ -83,47 +93,41 @@
 <!-- 3. De onde vem o áudio -->
 <section class="scene" data-start="21" data-end="36">
   <div class="chapter"><b>2</b> · De onde vêm as músicas</div>
-  <h2 data-in="0.2">Por que não baixa direto do Spotify?</h2>
-  <p class="lead" data-in="0.6">O áudio do Spotify é <b>criptografado</b> e só toca no app dele. Quebrar isso viola a lei de direitos autorais e os termos do Spotify.</p>
+  <h2 data-in="0.2">Por que não baixa direto do Spotify (nem do YouTube)?</h2>
+  <p class="lead" data-in="0.6">O áudio do Spotify é <b>criptografado</b>, e copiar música inteira sem licença (do YouTube, por exemplo) viola direitos autorais e os termos de uso.</p>
   <div class="grid4" style="margin-top:46px">
     <div class="card" data-in="1.4"><h3>💽 Seus arquivos</h3><p>CDs, downloads antigos, sua coleção</p></div>
     <div class="card" data-in="1.8"><h3>🎸 Bandcamp</h3><p>Compra em MP3 ou FLAC, sem proteção</p></div>
     <div class="card" data-in="2.2"><h3>🍎 iTunes Store</h3><p>Compras avulsas (não a assinatura Apple Music)</p></div>
     <div class="card" data-in="2.6"><h3>🎶 Livres</h3><p>Jamendo, Free Music Archive</p></div>
   </div>
-  <div class="row" style="margin-top:40px;align-items:stretch">
-    <div class="file" data-in="3.6" style="flex:1">
-      <div class="h">saida/_FALTANDO.txt: sua lista de compras</div>
-      [Rock Nacional] Legião Urbana - Será  →  open.spotify.com/track/…<br>
-      [Treino Pesado] Skank - Vou Deixar  →  open.spotify.com/track/…
-    </div>
-    <div class="card" data-in="4.4" style="flex:0 0 620px;display:flex;align-items:center"><p style="font-size:29px">Coloque o arquivo na pasta da sua biblioteca. No próximo sync ele é encontrado <b style="color:var(--text)">automaticamente</b> pelo artista e título.</p></div>
-  </div>
+  <div class="banner" data-in="3.8">📝 O Desktop mostra a lista <b>“Faltando arquivo”</b> com botões de busca no Bandcamp e no iTunes. Comprou? Arraste o arquivo para o painel.</div>
 </section>
 
-<!-- 4. Instalação: computador -->
-<section class="scene" data-start="36" data-end="51">
-  <div class="chapter"><b>3</b> · Instalação 1/3 · no computador</div>
-  <h2 data-in="0.2">Prepare o computador <span style="font-size:32px;color:var(--sub);font-weight:500">(uma vez só)</span></h2>
-  <div class="row" style="align-items:flex-start">
-    <div class="term" style="flex:1">
-      <div class="dots"><i></i><i></i><i></i></div>
-      <div data-in="0.8"><span class="p">$</span> pip install -e ".[tags]"</div>
-      <div data-in="2.0"><span class="p">$</span> cp config.example.json config.json</div>
-      <div data-in="3.2" class="c"># cole o Client ID do app criado em developer.spotify.com</div>
-      <div data-in="4.4" class="c"># escolha as playlists e a pasta das suas músicas</div>
-      <div data-in="5.8"><span class="p">$</span> python -m trex_sync login</div>
-      <div data-in="7.2" class="ok">✓ Login OK · permissão somente de leitura</div>
+<!-- 4. Instalação: Desktop -->
+<section class="scene" data-start="36" data-end="52">
+  <div class="chapter"><b>3</b> · Instalação 1/3 · spotifiBR Desktop no computador</div>
+  <h2 data-in="0.2">Instale e abra o spotifiBR Desktop</h2>
+  <div class="row" style="align-items:flex-start;gap:48px">
+    <div class="stack" style="width:760px;gap:28px">
+      <div class="term" style="font-size:27px">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div data-in="0.8"><span class="p">$</span> pip install -e ".[tags]"</div>
+        <div data-in="2.0"><span class="p">$</span> spotifibr</div>
+        <div data-in="3.0" class="ok">✓ painel aberto no navegador</div>
+      </div>
+      <div class="steps" style="gap:20px">
+        <div class="step" data-in="4.2"><div class="num">1</div><div class="t" style="font-size:28px">Configurações: cole o Client ID do Spotify, as playlists e a pasta das músicas</div></div>
+        <div class="step" data-in="6.2"><div class="num">2</div><div class="t" style="font-size:28px">Clique em <b class="accent">Conectar Spotify</b><small>permissão somente de leitura</small></div></div>
+        <div class="step" data-in="8.2"><div class="num">3</div><div class="t" style="font-size:28px">Clique em <b class="accent">Sincronizar agora</b></div></div>
+      </div>
     </div>
-    <div class="stack" style="width:520px">
-      <div class="card" data-in="1.2"><h3>Precisa de</h3><p>Python 3.10+, ffmpeg e Node 18+<br>(Windows, Mac ou Linux)</p></div>
-      <div class="card" data-in="3.4"><h3>App no Spotify</h3><p>Redirect URI:<br><code>http://127.0.0.1:8888/callback</code></p></div>
-    </div>
+    <div class="pc" style="width:860px" data-in="2.6" data-anim="left"><div class="bar"><i></i><i></i><i></i><span>127.0.0.1 · spotifiBR Desktop</span></div><img src="img/painel.png"></div>
   </div>
 </section>
 
 <!-- 5. Instalação: relógio -->
-<section class="scene" data-start="51" data-end="66">
+<section class="scene" data-start="52" data-end="67">
   <div class="chapter"><b>3</b> · Instalação 2/3 · app no relógio pelo iPhone</div>
   <h2 data-in="0.2">Instale o spotifiBR no relógio</h2>
   <div class="row" style="align-items:center;gap:70px">
@@ -141,70 +145,68 @@
 </section>
 
 <!-- 6. Conectar -->
-<section class="scene" data-start="66" data-end="80">
+<section class="scene" data-start="67" data-end="81">
   <div class="chapter"><b>3</b> · Instalação 3/3 · conectar relógio e computador</div>
-  <h2 data-in="0.2">Ligue o app ao seu computador</h2>
+  <h2 data-in="0.2">Ligue o relógio ao computador</h2>
   <div class="row" style="align-items:center;gap:60px">
     <div style="flex:1" class="stack">
-      <div class="term">
-        <div class="dots"><i></i><i></i><i></i></div>
-        <div data-in="0.8"><span class="p">$</span> python -m trex_sync servir --sync</div>
-        <div data-in="2.2">Endereço: <span class="ok">http://192.168.0.10:8765</span></div>
-        <div data-in="2.8">Token:&nbsp;&nbsp;&nbsp; <span class="ok">Qm9-xY3vK8pZ2rT6…</span></div>
+      <div class="card" data-in="0.8">
+        <h3>No Desktop: <span class="accent">Ligar servidor</span></h3>
+        <p style="font-family:'DejaVu Sans Mono',monospace;font-size:26px;line-height:1.8;color:#d7dde3">Endereço: <span class="accent">http://192.168.0.10:8765</span><br>Token:&nbsp;&nbsp;&nbsp; <span class="accent">Qm9-xY3vK8pZ2rT6…</span> <span style="font-family:Inter;font-size:22px;color:var(--sub)">[Copiar]</span></p>
       </div>
-      <div class="bul" data-in="4.2"><div class="dot"></div><div>No app Zepp: Perfil → T-Rex 3 → Apps → spotifiBR → Configurações<small>cole o endereço e o token; status verde = pronto</small></div></div>
-      <div class="bul" data-in="6.2"><div class="dot"></div><div>Na 1ª vez o iPhone pergunta sobre a rede local<small>toque em <b style="color:var(--text)">Permitir</b></small></div></div>
+      <div class="bul" data-in="3.0"><div class="dot"></div><div>No app Zepp: Perfil → T-Rex 3 → Apps → spotifiBR → Configurações<small>cole o endereço e o token; status verde = pronto</small></div></div>
+      <div class="bul" data-in="5.2"><div class="dot"></div><div>Na 1ª vez o iPhone pergunta sobre a rede local<small>toque em <b style="color:var(--text)">Permitir</b></small></div></div>
     </div>
-    <img src="img/tela-6.png" style="height:760px" data-in="3.6" data-anim="left">
+    <img src="img/tela-6.png" style="height:760px" data-in="2.4" data-anim="left">
   </div>
 </section>
 
 <!-- 7. Dia a dia -->
-<section class="scene" data-start="80" data-end="96">
+<section class="scene" data-start="81" data-end="97">
   <div class="chapter"><b>4</b> · Uso no dia a dia</div>
-  <h2 data-in="0.2">Músicas novas no relógio em 4 passos</h2>
-  <div class="row" style="align-items:center;gap:60px">
+  <h2 data-in="0.2">Músicas novas no relógio, quase sem fazer nada</h2>
+  <div class="row" style="align-items:center;gap:40px">
     <div class="steps" style="flex:1">
       <div class="step" data-in="0.8"><div class="num">1</div><div class="t">Adicione músicas às playlists no Spotify<small>como você já faz</small></div></div>
-      <div class="step" data-in="2.6"><div class="num">2</div><div class="t">Consiga os arquivos que faltam<small>veja <code>saida/_FALTANDO.txt</code></small></div></div>
-      <div class="step" data-in="4.4"><div class="num">3</div><div class="t">No computador: <code>python -m trex_sync servir --sync</code></div></div>
-      <div class="step" data-in="6.2"><div class="num">4</div><div class="t">Abra o spotifiBR no relógio<small>ele baixa só o que é novo, com progresso e novas tentativas</small></div></div>
+      <div class="step" data-in="2.6"><div class="num">2</div><div class="t">Arraste para o Desktop os arquivos que faltam<small>a lista “Faltando arquivo” mostra quais</small></div></div>
+      <div class="step" data-in="4.4"><div class="num">3</div><div class="t">O modo <b class="accent">Automático</b> sincroniza sozinho<small>quando entra música nova na pasta e a cada X minutos</small></div></div>
+      <div class="step" data-in="6.2"><div class="num">4</div><div class="t">Abra o spotifiBR no relógio<small>baixa só o que é novo, com progresso e novas tentativas</small></div></div>
       <div class="banner" data-in="8.6" style="margin-top:10px;font-size:28px">💡 Deixe o app Zepp aberto no iPhone até aparecer “Sincronização concluída”.</div>
     </div>
-    <div style="text-align:center" data-in="6.6" data-anim="scale"><img class="watch" src="img/tela-1.png" style="width:520px;height:520px"><div class="cap">sincronizando: “3 de 8 · enviando 60%”</div></div>
+    <div style="text-align:center" data-in="6.6" data-anim="scale"><div class="trex" data-screen="img/screen-1.png" style="width:420px;margin:-20px auto 0"></div><div class="cap">sincronizando: “3 de 8 · enviando 60%”</div></div>
   </div>
 </section>
 
 <!-- 8. Ouvir -->
-<section class="scene" data-start="96" data-end="108">
+<section class="scene" data-start="97" data-end="110">
   <div class="chapter"><b>5</b> · Ouvir</div>
-  <h2 data-in="0.2">Escolha, toque, corra</h2>
-  <div class="row" style="justify-content:space-between;margin-top:10px">
-    <div style="text-align:center" data-in="0.8" data-anim="scale"><img class="watch" src="img/tela-2.png"><div class="cap">1. Escolha a playlist</div></div>
-    <div style="text-align:center" data-in="2.0" data-anim="scale"><img class="watch" src="img/tela-3.png"><div class="cap">2. Tocar ou Aleatório</div></div>
-    <div style="text-align:center" data-in="3.2" data-anim="scale"><img class="watch" src="img/tela-5.png"><div class="cap">3. Continua com a tela apagada</div></div>
+  <h2 data-in="0.2" style="margin-bottom:6px">Escolha, toque, corra</h2>
+  <div class="row" style="justify-content:space-around;margin-top:-10px">
+    <div style="text-align:center" data-in="0.8" data-anim="scale"><div class="trex" data-screen="img/screen-2.png" style="width:400px"></div><div class="cap">1. Biblioteca com capas</div></div>
+    <div style="text-align:center" data-in="2.0" data-anim="scale"><div class="trex" data-screen="img/screen-3.png" style="width:400px"></div><div class="cap">2. Aleatório ou Play</div></div>
+    <div style="text-align:center" data-in="3.2" data-anim="scale"><div class="trex" data-screen="img/screen-5.png" style="width:400px"></div><div class="cap">3. Continua com a tela apagada</div></div>
   </div>
-  <div class="banner" data-in="5.0">🎧 Conecte os fones Bluetooth pelo menu do relógio. Botões físicos de cima e de baixo trocam a faixa.</div>
+  <div class="banner" data-in="5.0" style="margin-top:28px">🎧 Conecte os fones Bluetooth pelo menu do relógio. Os botões laterais de cima e de baixo trocam a faixa.</div>
 </section>
 
 <!-- 9. Segurança -->
-<section class="scene" data-start="108" data-end="119">
+<section class="scene" data-start="110" data-end="121">
   <div class="chapter"><b>6</b> · Segurança</div>
   <h2 data-in="0.2">Sua conta protegida</h2>
-  <div class="stack" style="gap:34px;margin-top:10px">
+  <div class="stack" style="gap:30px;margin-top:10px">
     <div class="bul" data-in="0.8"><div class="dot"></div><div>O login do Spotify fica só no seu computador<small>permissão somente de leitura; celular e relógio nunca recebem a senha nem o token da conta</small></div></div>
-    <div class="bul" data-in="2.2"><div class="dot"></div><div>Token forte (256 bits) só para as músicas<small>o servidor entrega apenas as músicas da lista, nunca outros arquivos do PC</small></div></div>
-    <div class="bul" data-in="3.6"><div class="dot"></div><div>Fora de casa? Use o Tailscale (HTTPS)<small>Wi-Fi público sem cifra, nunca</small></div></div>
-    <div class="bul" data-in="5.0"><div class="dot"></div><div>Perdeu o celular?<small><code>python -m trex_sync novo-token</code> invalida o acesso na hora</small></div></div>
+    <div class="bul" data-in="2.0"><div class="dot"></div><div>O Desktop só abre no próprio computador (127.0.0.1)<small>link com chave aleatória por sessão; ninguém da rede consegue mexer nele</small></div></div>
+    <div class="bul" data-in="3.2"><div class="dot"></div><div>Token forte (256 bits) só para as músicas<small>o servidor entrega apenas as músicas da lista, nunca outros arquivos do PC</small></div></div>
+    <div class="bul" data-in="4.4"><div class="dot"></div><div>Fora de casa? Use o Tailscale (HTTPS)<small>Perdeu o celular? Botão <b style="color:var(--text)">Gerar novo token</b> no Desktop</small></div></div>
   </div>
 </section>
 
 <!-- 10. Fim -->
-<section class="scene" data-start="119" data-end="126" style="justify-content:center;align-items:center;text-align:center">
+<section class="scene" data-start="121" data-end="128" style="justify-content:center;align-items:center;text-align:center">
   <img src="img/icon.png" style="width:150px;height:150px;margin-bottom:30px" data-in="0.2" data-anim="scale">
   <h1 data-in="0.5">spotifi<span class="accent">BR</span></h1>
   <p class="lead" data-in="1.0">Guia completo: <code>COMO_USAR.md</code> · Segurança: <code>SECURITY.md</code></p>
-  <p class="lead" data-in="1.6" style="margin-top:26px;font-size:28px">Projeto pessoal · sem afiliação com Spotify ou Zepp/Amazfit</p>
+  <p class="lead" data-in="1.6" style="margin-top:26px;font-size:28px">Projeto pessoal · sem afiliação com Spotify ou Zepp/Amazfit · relógio ilustrativo</p>
 </section>
 
 <div class="progress" id="progress"></div>
@@ -221,7 +223,48 @@
     if (corner && r % 2 === 1 && c % 2 === 1 && !(r === 1 && c === 1) && !(r === 1 && c === 9) && !(r === 9 && c === 1)) i.className = 'o'
     qr.appendChild(i)
   }
-  const DURATION = 126
+
+  const WATCH_SVG = (() => {
+    const cx = 300, cy = 390
+    let ticks = ''
+    for (let i = 0; i < 60; i++) {
+      const a = (i / 60) * Math.PI * 2, r1 = i % 5 ? 212 : 204, r2 = 218
+      ticks += `<line x1="${cx + r1 * Math.sin(a)}" y1="${cy - r1 * Math.cos(a)}" x2="${cx + r2 * Math.sin(a)}" y2="${cy - r2 * Math.cos(a)}" stroke="${i % 15 ? '#4a5058' : '#1ed760'}" stroke-width="${i % 5 ? 2 : 4}"/>`
+    }
+    let screws = ''
+    for (const deg of [45, 135, 225, 315]) {
+      const a = (deg * Math.PI) / 180, x = cx + 236 * Math.sin(a), y = cy - 236 * Math.cos(a)
+      screws += `<circle cx="${x}" cy="${y}" r="13" fill="url(#screw)" stroke="#15171a" stroke-width="2"/><line x1="${x - 7}" y1="${y - 4}" x2="${x + 7}" y2="${y + 4}" stroke="#15171a" stroke-width="3"/>`
+    }
+    let grooves = ''
+    for (let y = 30; y < 160; y += 26) grooves += `<rect x="190" y="${y}" width="220" height="10" rx="5" fill="#141619"/>`
+    for (let y = 640; y < 770; y += 26) grooves += `<rect x="190" y="${y}" width="220" height="10" rx="5" fill="#141619"/>`
+    const label = (x, y, t, anchor) => `<text x="${x}" y="${y}" fill="#7d8690" font-size="15" font-family="Inter,sans-serif" font-weight="600" letter-spacing="2" text-anchor="${anchor}">${t}</text>`
+    return `<svg viewBox="0 0 600 780" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="case" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4b5158"/><stop offset=".5" stop-color="#2a2e33"/><stop offset="1" stop-color="#1a1d21"/></linearGradient>
+        <linearGradient id="strap" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#16181b"/><stop offset=".5" stop-color="#24272b"/><stop offset="1" stop-color="#16181b"/></linearGradient>
+        <radialGradient id="screw"><stop offset="0" stop-color="#9aa2ab"/><stop offset="1" stop-color="#555b62"/></radialGradient>
+        <linearGradient id="btn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d4248"/><stop offset="1" stop-color="#1f2226"/></linearGradient>
+      </defs>
+      <rect x="170" y="0" width="260" height="200" rx="34" fill="url(#strap)"/>
+      <rect x="170" y="580" width="260" height="200" rx="34" fill="url(#strap)"/>
+      ${grooves}
+      <rect x="22" y="268" width="44" height="86" rx="12" fill="url(#btn)" stroke="#111" stroke-width="2"/>
+      <rect x="22" y="426" width="44" height="86" rx="12" fill="url(#btn)" stroke="#111" stroke-width="2"/>
+      <rect x="534" y="268" width="44" height="86" rx="12" fill="#ff7a1a" stroke="#111" stroke-width="2"/>
+      <rect x="534" y="426" width="44" height="86" rx="12" fill="url(#btn)" stroke="#111" stroke-width="2"/>
+      <rect x="48" y="138" width="504" height="504" rx="150" fill="url(#case)" stroke="#5c636b" stroke-width="3"/>
+      <rect x="62" y="152" width="476" height="476" rx="140" fill="none" stroke="#1a1c1f" stroke-width="4"/>
+      <circle cx="${cx}" cy="${cy}" r="226" fill="#101215" stroke="#2f343a" stroke-width="6"/>
+      ${ticks}${screws}
+      <circle cx="${cx}" cy="${cy}" r="198" fill="#000" stroke="#22262b" stroke-width="4"/>
+    </svg>`
+  })()
+  document.querySelectorAll('.trex').forEach((w) => {
+    w.innerHTML = WATCH_SVG + `<img class="scr" src="${w.dataset.screen}"><div class="glare"></div>`
+  })
+  const DURATION = 128
   const scenes = [...document.querySelectorAll('.scene')].map((el) => ({ el, start: +el.dataset.start, end: +el.dataset.end }))
   const ease = (p) => 1 - Math.pow(1 - p, 3)
   window.setTime = (t) => {

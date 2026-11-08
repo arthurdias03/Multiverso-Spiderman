@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
+from pathlib import Path
 
 from .config import Config
-from .library import Library
-from .spotify import SpotifyClient, parse_playlist_id
-from .sync import TRANSFER_DIR, State, confirm_transfer, sync_playlist, write_manifest, write_missing
+from .spotify import SpotifyClient
+from .sync import TRANSFER_DIR, State, confirm_transfer
 
 
 def cmd_login(cfg: Config, args) -> int:
@@ -18,43 +19,15 @@ def cmd_login(cfg: Config, args) -> int:
 
 
 def cmd_sync(cfg: Config, args) -> int:
-    if not cfg.playlists:
-        print("Nenhuma playlist em 'playlists' no config.json.")
-        return 1
-    sp = SpotifyClient(cfg.spotify_client_id, cfg.token_file, cfg.redirect_uri)
-    dirs = list(cfg.library_dirs) + ([cfg.download_dir] if cfg.downloader_command else [])
-    print("Indexando biblioteca local...")
-    library = Library.scan([cfg.resolve(d) for d in dirs])
-    print(f"  {len(library.files)} arquivos de áudio encontrados")
-    state = State(cfg.state_file)
-    reports = []
-    for ref in cfg.playlists:
-        pid = parse_playlist_id(ref)
-        name = sp.playlist_name(pid)
-        tracks = sp.playlist_tracks(pid)
-        r = sync_playlist(
-            pid, name, tracks, library, state, cfg.out,
-            convert=cfg.convert_to_mp3, bitrate=cfg.mp3_bitrate,
-            downloader=cfg.downloader_command or None,
-            download_dir=cfg.resolve(cfg.download_dir),
-        )
-        reports.append(r)
-        print(f"\n[{r.name}] {r.total} faixas | novas p/ relógio: {len(r.new)} | "
-              f"sem arquivo: {len(r.missing)} | removidas: {len(r.removed)}")
-        for f in r.removed:
-            print(f"   - REMOVA do relógio: {f}")
-    missing = write_missing(reports, cfg.out)
-    write_manifest(reports, cfg.out)
+    from .runner import run_sync
+
+    reports = run_sync(cfg)
     pending = sum(len(r.new) for r in reports)
+    missing = sum(len(r.missing) for r in reports)
     print()
-    if pending:
-        print(f"{pending} faixa(s) em {cfg.out / TRANSFER_DIR}")
-        print("Transfira pelo app Zepp (Perfil > relógio > Música > Transferir) e depois rode:")
-        print("   python -m trex_sync confirmar")
-    else:
-        print("Nada novo para transferir.")
+    print(f"{pending} faixa(s) nova(s) prontas em {cfg.out / TRANSFER_DIR}" if pending else "Nada novo.")
     if missing:
-        print(f"Faixas sem arquivo local listadas em {missing}")
+        print(f"{missing} faixa(s) sem arquivo local: veja {cfg.out / '_FALTANDO.txt'}")
     return 0
 
 
@@ -89,6 +62,24 @@ def cmd_new_token(cfg: Config, args) -> int:
     return 0
 
 
+def cmd_panel(cfg_path: str, args) -> int:
+    from .panel import run_panel
+
+    run_panel(Path(cfg_path), port=args.port, open_browser=not args.no_browser)
+    return 0
+
+
+def ensure_config(path: Path) -> None:
+    """Cria um config.json inicial (vazio) para o painel poder ser configurado pela interface."""
+    if path.exists():
+        return
+    example = Path(__file__).resolve().parent.parent / "config.example.json"
+    data = json.loads(example.read_text(encoding="utf-8")) if example.exists() else {}
+    data.update({"spotify_client_id": "", "playlists": [], "library_dirs": [str(Path.home() / "Music")]})
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"Criei {path} (configure pelo painel).")
+
+
 def cmd_status(cfg: Config, args) -> int:
     state = State(cfg.state_file)
     if not state.data["playlists"]:
@@ -111,7 +102,17 @@ def main(argv: list[str] | None = None) -> int:
     sv.add_argument("--port", type=int, default=0)
     sv.add_argument("--sync", action="store_true", help="roda o sync antes de servir")
     sub.add_parser("novo-token", help="gera um novo token do servidor (invalida o antigo)")
+    pn = sub.add_parser("painel", help="abre o spotifiBR Desktop (painel no navegador)")
+    pn.add_argument("--port", type=int, default=8770)
+    pn.add_argument("--no-browser", action="store_true")
     args = ap.parse_args(argv)
+    if args.cmd == "painel":
+        try:
+            ensure_config(Path(args.config))
+            return cmd_panel(args.config, args)
+        except (ValueError, RuntimeError, OSError) as e:
+            print("Erro:", e, file=sys.stderr)
+            return 2
     try:
         cfg = Config.load(args.config)
         return {"login": cmd_login, "sync": cmd_sync, "confirmar": cmd_confirm, "status": cmd_status, "servir": cmd_serve, "novo-token": cmd_new_token}[args.cmd](cfg, args)

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>spotifiBR Desktop</title><link rel="icon" href="/icon.png"><link rel="stylesheet" href="/panel.css"></head>
+<body>
+<header>
+  <div class="brand"><img src="/icon.png" alt=""><div><h1>spotifi<span>BR</span> Desktop</h1><p>Suas playlists do Spotify no Amazfit T-Rex 3</p></div></div>
+  <div class="chips"><span class="chip" id="chip-spotify">Spotify</span><span class="chip" id="chip-server">Servidor</span><span class="chip" id="chip-auto">Automático</span></div>
+</header>
+<main>
+  <section class="col">
+    <div class="card">
+      <div class="step"><b>1</b><h2>Conta do Spotify</h2></div>
+      <p class="muted" id="spotify-text">—</p>
+      <button id="btn-login" class="primary">Conectar Spotify</button>
+    </div>
+    <div class="card">
+      <div class="step"><b>2</b><h2>Suas músicas</h2></div>
+      <p class="muted">Arraste aqui os arquivos que você comprou ou já tem (MP3, M4A, FLAC). Eles vão para a sua biblioteca e entram no próximo sync.</p>
+      <div id="drop" class="drop">Solte os arquivos aqui<br><small>ou clique para escolher</small><input id="file" type="file" multiple accept=".mp3,.m4a,.aac,.flac,.ogg,.opus,.wav" hidden></div>
+      <div class="row"><button id="btn-open">Abrir pasta da biblioteca</button><button id="btn-sync" class="primary">Sincronizar agora</button></div>
+    </div>
+    <div class="card">
+      <div class="step"><b>3</b><h2>Servidor para o relógio</h2></div>
+      <p class="muted" id="server-text">Desligado. Ligue para o relógio baixar as músicas pelo app Zepp.</p>
+      <div id="server-box" class="kv hidden">
+        <label>Endereço</label><div><code id="srv-url"></code><button class="mini" data-copy="srv-url">Copiar</button></div>
+        <label>Token</label><div><code id="srv-token"></code><button class="mini" data-copy="srv-token">Copiar</button></div>
+      </div>
+      <div class="row"><button id="btn-server" class="primary">Ligar servidor</button><button id="btn-token">Gerar novo token</button></div>
+    </div>
+    <div class="card">
+      <div class="step"><b>⟳</b><h2>Automático</h2></div>
+      <label class="switch"><input id="auto" type="checkbox"><span></span> Sincronizar sozinho quando entrar música nova na pasta e a cada <input id="auto-min" type="number" min="1" max="1440" value="10"> min</label>
+    </div>
+  </section>
+  <section class="col wide">
+    <div class="card">
+      <div class="head"><h2>Playlists</h2><span class="muted" id="last-sync"></span></div>
+      <div id="playlists" class="pl-list"></div>
+    </div>
+    <div class="card">
+      <div class="head"><h2>Faltando arquivo</h2><span class="muted" id="missing-count"></span></div>
+      <p class="muted">Estas músicas estão nas suas playlists mas não na sua biblioteca. Consiga o arquivo (Bandcamp, compras na iTunes Store, seus CDs) e solte no passo 2.</p>
+      <div id="missing" class="missing"></div>
+    </div>
+    <div class="card">
+      <div class="head"><h2>Atividade</h2><span class="muted" id="busy"></span></div>
+      <pre id="log"></pre>
+    </div>
+    <details class="card">
+      <summary><h2>Configurações</h2></summary>
+      <div class="form">
+        <label>Client ID do app no Spotify <small>(developer.spotify.com → seu app)</small></label><input id="cfg-client" autocomplete="off">
+        <label>Playlists <small>(um link por linha; "liked" = Músicas Curtidas)</small></label><textarea id="cfg-playlists" rows="4"></textarea>
+        <label>Pastas da biblioteca <small>(uma por linha)</small></label><textarea id="cfg-dirs" rows="2"></textarea>
+        <label>Qualidade no relógio</label><select id="cfg-bitrate"><option>96k</option><option>128k</option><option>160k</option><option>192k</option><option>256k</option><option>320k</option></select>
+        <button id="btn-save" class="primary">Salvar</button>
+      </div>
+    </details>
+  </section>
+</main>
+<div id="toast" class="toast"></div>
+<script src="/panel.js"></script>
+</body></html>

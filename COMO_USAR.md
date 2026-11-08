@@ -27,6 +27,28 @@ O Spotify não permite exportar o áudio: ele é criptografado e só toca dentro
 
 O trex-sync lê a sua playlist e gera `saida/_FALTANDO.txt`, a lista das músicas que você ainda não tem em arquivo, cada uma com o link. Use essa lista como lista de compras.
 
+## spotifiBR Desktop (o app do computador)
+
+![spotifiBR Desktop](docs/telas/painel.png)
+
+Em vez de digitar comandos, abra o painel:
+
+```bash
+pip install -e ".[tags]"
+spotifibr          # ou: python -m trex_sync painel
+```
+
+Ele abre no navegador, só no seu computador (`127.0.0.1`, com uma chave aleatória por sessão). Pelo painel você:
+
+- configura Client ID, playlists, pastas e qualidade;
+- clica em **Conectar Spotify** (somente leitura);
+- **arrasta os arquivos de música** que você comprou ou já tem: eles vão para a biblioteca;
+- vê **"Faltando arquivo"**, com botões de busca no Bandcamp, no iTunes e no Spotify;
+- clica em **Sincronizar agora**, ou liga o **Automático**: ele sincroniza sozinho quando entra música nova na pasta e a cada X minutos;
+- liga o **servidor para o relógio** e copia endereço e token com um clique.
+
+Os passos abaixo continuam valendo para quem preferir a linha de comando.
+
 ## Primeira configuração (uma vez só, cerca de 30 min)
 
 **No computador** (Windows, Mac ou Linux):

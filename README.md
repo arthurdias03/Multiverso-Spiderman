@@ -8,7 +8,7 @@ O projeto tem duas partes:
 
 | Parte | Pasta | O que faz |
 |---|---|---|
-| **trex-sync** (PC, Python) | `trex_sync/` | Lê suas playlists no Spotify, monta uma pasta de MP3 por playlist e serve tudo por HTTP (`servir`) |
+| **spotifiBR Desktop / trex-sync** (PC, Python) | `trex_sync/` | Painel no navegador (`spotifibr`) ou linha de comando: lê suas playlists no Spotify, recebe seus arquivos, sincroniza sozinho e serve as músicas para o relógio |
 | **spotifiBR** (relógio, Zepp OS) | `zepp-app/` | Ao abrir no relógio, baixa só as músicas novas pelo app Zepp e toca offline, inclusive em segundo plano. Veja [`zepp-app/README.md`](zepp-app/README.md) |
 
 Com o app do relógio instalado, o fluxo vira: `python -m trex_sync servir --sync` no PC → abrir o spotifiBR no relógio. O passo manual de transferir pelo app Zepp e o `confirmar` deixam de existir.

@@ -10,3 +10,10 @@ tags = ["mutagen>=1.47"]
 
 [project.scripts]
 trex-sync = "trex_sync.__main__:main"
+spotifibr = "trex_sync.panel_entry:main"
+
+[tool.setuptools]
+packages = ["trex_sync"]
+
+[tool.setuptools.package-data]
+trex_sync = ["static/*"]
