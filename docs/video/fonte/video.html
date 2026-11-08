@@ -55,6 +55,7 @@
   .pc .bar i{width:12px;height:12px;border-radius:50%;background:#3a4048;display:block}
   .pc .bar span{margin-left:12px;font-size:15px;color:#8b95a1;font-family:"DejaVu Sans Mono",monospace}
   .pc img{display:block;width:100%}
+.fict{position:absolute;right:40px;top:36px;z-index:10;background:#ffcc4d;color:#2a1d00;font-weight:800;font-size:22px;letter-spacing:.06em;padding:8px 16px;border-radius:10px}
 </style></head><body>
 
 <!-- 1. Abertura -->
@@ -152,7 +153,7 @@
     <div style="flex:1" class="stack">
       <div class="card" data-in="0.8">
         <h3>No Desktop: <span class="accent">Ligar servidor</span></h3>
-        <p style="font-family:'DejaVu Sans Mono',monospace;font-size:26px;line-height:1.8;color:#d7dde3">Endereço: <span class="accent">http://192.168.0.10:8765</span><br>Token:&nbsp;&nbsp;&nbsp; <span class="accent">Qm9-xY3vK8pZ2rT6…</span> <span style="font-family:Inter;font-size:22px;color:var(--sub)">[Copiar]</span></p>
+        <p style="font-family:'DejaVu Sans Mono',monospace;font-size:26px;line-height:1.8;color:#d7dde3">Endereço: <span class="accent">http://192.168.0.10:8765</span> <span style="font-family:Inter;font-size:22px;color:var(--sub)">(exemplo)</span><br>Token:&nbsp;&nbsp;&nbsp; <span class="accent">EXEMPLO-token-ficticio…</span> <span style="font-family:Inter;font-size:22px;color:var(--sub)">[Copiar]</span></p>
       </div>
       <div class="bul" data-in="3.0"><div class="dot"></div><div>No app Zepp: Perfil → T-Rex 3 → Apps → spotifiBR → Configurações<small>cole o endereço e o token; status verde = pronto</small></div></div>
       <div class="bul" data-in="5.2"><div class="dot"></div><div>Na 1ª vez o iPhone pergunta sobre a rede local<small>toque em <b style="color:var(--text)">Permitir</b></small></div></div>
@@ -206,9 +207,10 @@
   <img src="img/icon.png" style="width:150px;height:150px;margin-bottom:30px" data-in="0.2" data-anim="scale">
   <h1 data-in="0.5">spotifi<span class="accent">BR</span></h1>
   <p class="lead" data-in="1.0">Guia completo: <code>COMO_USAR.md</code> · Segurança: <code>SECURITY.md</code></p>
-  <p class="lead" data-in="1.6" style="margin-top:26px;font-size:28px">Projeto pessoal · sem afiliação com Spotify ou Zepp/Amazfit · relógio ilustrativo</p>
+  <p class="lead" data-in="1.6" style="margin-top:26px;font-size:28px">Projeto pessoal · sem afiliação com Spotify ou Zepp/Amazfit<br>Relógio ilustrativo · músicas, artistas, playlists, endereço e token fictícios</p>
 </section>
 
+<div class="fict">DADOS FICTÍCIOS</div>
 <div class="progress" id="progress"></div>
 
 <script>
