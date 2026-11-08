@@ -95,3 +95,46 @@ class TestSync(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestManifestAndServer(unittest.TestCase):
+    def test_manifest_and_token(self):
+        import threading
+        import urllib.error
+        import urllib.request
+
+        from trex_sync.server import make_server
+        from trex_sync.sync import write_manifest
+
+        tmp = Path(tempfile.mkdtemp())
+        lib = tmp / "lib"
+        lib.mkdir()
+        (lib / "Queen - Bohemian Rhapsody.mp3").write_bytes(b"ID3abc")
+        out = tmp / "out"
+        r = sync_playlist("p1", "Rock", [T("2", "Queen", "Bohemian Rhapsody"), T("3", "X", "Y")],
+                          Library.scan([lib]), State(out / ".trex_state.json"), out)
+        write_manifest([r], out)
+        m = json.loads((out / "manifest.json").read_text())
+        self.assertEqual(m["playlists"][0]["id"], "p1")
+        self.assertEqual(m["playlists"][0]["tracks"],
+                         [{"id": "2", "t": "Bohemian Rhapsody", "a": "Queen",
+                           "p": "Rock/Queen - Bohemian Rhapsody.mp3", "s": 6}])
+
+        srv = make_server(out, 0, "segredo")
+        port = srv.server_address[1]
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        base = f"http://127.0.0.1:{port}"
+        try:
+            with self.assertRaises(urllib.error.HTTPError) as e:
+                urllib.request.urlopen(base + "/manifest.json")
+            self.assertEqual(e.exception.code, 401)
+            with urllib.request.urlopen(base + "/manifest.json?k=segredo") as resp:
+                self.assertEqual(json.load(resp)["version"], 1)
+            with urllib.request.urlopen(base + "/Rock/Queen%20-%20Bohemian%20Rhapsody.mp3?k=segredo") as resp:
+                self.assertEqual(resp.read(), b"ID3abc")
+            with self.assertRaises(urllib.error.HTTPError) as e:
+                urllib.request.urlopen(base + "/.trex_state.json?k=segredo")
+            self.assertEqual(e.exception.code, 404)
+        finally:
+            srv.shutdown()
+            srv.server_close()

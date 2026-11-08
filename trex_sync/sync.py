@@ -55,6 +55,8 @@ class PlaylistReport:
     new: list[str] = field(default_factory=list)
     missing: list[Track] = field(default_factory=list)
     removed: list[str] = field(default_factory=list)
+    entries: list[dict] = field(default_factory=list)  # faixas disponíveis, na ordem da playlist
+    playlist_id: str = ""
 
 
 def export_audio(src: Path, dst: Path, convert: bool, bitrate: str) -> Path:
@@ -142,8 +144,35 @@ def sync_playlist(
         (mirror / fname).unlink(missing_ok=True)
         (transfer / fname).unlink(missing_ok=True)
 
+    # Entradas do manifesto (usado pelo app do relógio): tudo que existe no espelho, na ordem da playlist
+    available = {**pl["transferred"], **pl["pending"]}
+    for t in tracks:
+        fname = available.get(t.id)
+        if fname and (mirror / fname).exists():
+            report.entries.append({
+                "id": t.id, "t": t.title, "a": ", ".join(t.artists),
+                "p": f"{folder}/{fname}", "s": (mirror / fname).stat().st_size,
+            })
+    report.playlist_id = pid
+
     state.save()
     return report
+
+
+def write_manifest(reports: list["PlaylistReport"], out_root: Path) -> Path:
+    import time
+
+    data = {
+        "version": 1,
+        "generated": int(time.time()),
+        "playlists": [{"id": r.playlist_id, "name": r.name, "tracks": r.entries} for r in reports],
+    }
+    path = out_root / "manifest.json"
+    out_root.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    tmp.replace(path)
+    return path
 
 
 def confirm_transfer(state: State, out_root: Path) -> int:

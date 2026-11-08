@@ -13,9 +13,11 @@ class Config:
     library_dirs: list[str] = field(default_factory=list)
     output_dir: str = "saida"
     convert_to_mp3: bool = True
-    mp3_bitrate: str = "192k"
+    mp3_bitrate: str = "128k"
     downloader_command: list[str] = field(default_factory=list)
     download_dir: str = "downloads"
+    server_port: int = 8765
+    server_token: str = ""
     base: Path = Path(".")
 
     @classmethod

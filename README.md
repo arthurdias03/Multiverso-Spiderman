@@ -1,13 +1,20 @@
-# trex-sync — playlists do Spotify no Amazfit T-Rex 3
+# trex-sync + T-Rex Music: playlists do Spotify offline no Amazfit T-Rex 3
 
-Mantém uma pasta de MP3 por playlist do Spotify e separa **só as músicas novas** para você mandar ao relógio.
+O projeto tem duas partes:
+
+| Parte | Pasta | O que faz |
+|---|---|---|
+| **trex-sync** (PC, Python) | `trex_sync/` | Lê suas playlists no Spotify, monta uma pasta de MP3 por playlist e serve tudo por HTTP (`servir`) |
+| **T-Rex Music** (relógio, Zepp OS) | `zepp-app/` | Ao abrir no relógio, baixa só as músicas novas pelo app Zepp e toca offline, inclusive em segundo plano. Veja [`zepp-app/README.md`](zepp-app/README.md) |
+
+Com o app do relógio instalado, o fluxo vira: `python -m trex_sync servir --sync` no PC → abrir o T-Rex Music no relógio. O passo manual de transferir pelo app Zepp e o `confirmar` deixam de existir.
 
 ## Limites (leia antes)
 
 | Limite | Causa | Consequência |
 |---|---|---|
 | Não baixa o áudio do Spotify | As músicas baixadas no Spotify são criptografadas e só tocam no app dele. Não há API para exportá-las | Os MP3 vêm da **sua biblioteca local** (ou de um downloader externo configurado por você) |
-| Não envia sozinho ao conectar | O Zepp OS não deixa apps de terceiros gravarem na biblioteca de música do relógio. Só o app Zepp faz isso, e manualmente | O envio é feito em **1 passo manual** no app Zepp, com tudo já separado em pastas |
+| Não grava no player nativo do relógio | Mini-apps não acessam a biblioteca de música do sistema | O app **T-Rex Music** (`zepp-app/`) tem player próprio e sincroniza sozinho ao ser aberto. Sem ele, o envio é manual pelo app Zepp |
 
 ## Como funciona
 
@@ -49,7 +56,10 @@ python -m trex_sync sync        # gera saida/_PARA_TRANSFERIR com as faixas nova
 #    Perfil > T-Rex 3 > Música > Transferir (relógio no Wi-Fi acelera)
 python -m trex_sync confirmar   # marca como transferidas; o próximo sync só traz novidades
 python -m trex_sync status
+python -m trex_sync servir --sync   # para o app T-Rex Music do relógio (mesmo Wi-Fi do celular)
 ```
+
+Para o app do relógio, defina `server_token` no `config.json` e use `mp3_bitrate` de 96k a 128k: a transferência por Bluetooth é lenta.
 
 Se você rodar `sync` de novo sem `confirmar`, as pendentes continuam pendentes. Nada é duplicado.
 

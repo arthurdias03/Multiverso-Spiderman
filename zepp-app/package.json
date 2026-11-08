@@ -1,0 +1,17 @@
+{
+  "name": "trex-music",
+  "version": "0.1.0",
+  "private": true,
+  "description": "App Zepp OS: playlists sincronizadas pelo trex-sync, tocando offline no Amazfit T-Rex 3",
+  "scripts": {
+    "build": "zeus build",
+    "preview": "zeus preview",
+    "test": "node test/run.mjs"
+  },
+  "dependencies": {
+    "@zeppos/zml": "0.0.43"
+  },
+  "devDependencies": {
+    "@zeppos/device-types": "^4.0.0"
+  }
+}

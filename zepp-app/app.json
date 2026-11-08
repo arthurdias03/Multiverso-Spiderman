@@ -1,0 +1,38 @@
+{
+  "configVersion": "v3",
+  "app": {
+    "appId": 1098765,
+    "appName": "T-Rex Music",
+    "appType": "app",
+    "version": { "code": 1, "name": "0.1.0" },
+    "icon": "icon.png",
+    "vender": "trex-sync",
+    "description": "Playlists do Spotify offline no relógio, sincronizadas pelo trex-sync"
+  },
+  "permissions": ["device:os.bg_service", "data:os.device.info"],
+  "runtime": {
+    "apiVersion": { "compatible": "3.0.0", "target": "3.0.0", "minVersion": "3.0.0" }
+  },
+  "debug": false,
+  "targets": {
+    "common": {
+      "module": {
+        "page": {
+          "pages": ["page/home", "page/playlist", "page/player"]
+        },
+        "app-service": {
+          "services": ["app-service/player_service"]
+        },
+        "app-side": { "path": "app-side/index" },
+        "setting": { "path": "setting/index" }
+      },
+      "platforms": [{ "st": "r" }],
+      "designWidth": 480
+    }
+  },
+  "i18n": {
+    "pt-BR": { "appName": "T-Rex Music" },
+    "en-US": { "appName": "T-Rex Music" }
+  },
+  "defaultLanguage": "en-US"
+}

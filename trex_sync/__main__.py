@@ -8,7 +8,7 @@ import sys
 from .config import Config
 from .library import Library
 from .spotify import SpotifyClient, parse_playlist_id
-from .sync import TRANSFER_DIR, State, confirm_transfer, sync_playlist, write_missing
+from .sync import TRANSFER_DIR, State, confirm_transfer, sync_playlist, write_manifest, write_missing
 
 
 def cmd_login(cfg: Config, args) -> int:
@@ -44,6 +44,7 @@ def cmd_sync(cfg: Config, args) -> int:
         for f in r.removed:
             print(f"   - REMOVA do relógio: {f}")
     missing = write_missing(reports, cfg.out)
+    write_manifest(reports, cfg.out)
     pending = sum(len(r.new) for r in reports)
     print()
     if pending:
@@ -60,6 +61,17 @@ def cmd_sync(cfg: Config, args) -> int:
 def cmd_confirm(cfg: Config, args) -> int:
     n = confirm_transfer(State(cfg.state_file), cfg.out)
     print(f"{n} faixa(s) marcadas como transferidas.")
+    return 0
+
+
+def cmd_serve(cfg: Config, args) -> int:
+    from .server import serve
+
+    if args.sync:
+        rc = cmd_sync(cfg, args)
+        if rc:
+            return rc
+    serve(cfg.out, args.port or cfg.server_port, cfg.server_token)
     return 0
 
 
@@ -81,10 +93,13 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("sync", help="gera a pasta com as músicas novas de cada playlist")
     sub.add_parser("confirmar", help="marca as pendentes como já transferidas para o relógio")
     sub.add_parser("status", help="mostra o estado por playlist")
+    sv = sub.add_parser("servir", help="serve as músicas para o app T-Rex Music do relógio")
+    sv.add_argument("--port", type=int, default=0)
+    sv.add_argument("--sync", action="store_true", help="roda o sync antes de servir")
     args = ap.parse_args(argv)
     try:
         cfg = Config.load(args.config)
-        return {"login": cmd_login, "sync": cmd_sync, "confirmar": cmd_confirm, "status": cmd_status}[args.cmd](cfg, args)
+        return {"login": cmd_login, "sync": cmd_sync, "confirmar": cmd_confirm, "status": cmd_status, "servir": cmd_serve}[args.cmd](cfg, args)
     except (FileNotFoundError, ValueError, RuntimeError) as e:
         print("Erro:", e, file=sys.stderr)
         return 2
