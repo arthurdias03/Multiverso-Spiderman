@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, renameSync, statSync } from '@zos/fs'
 import { LIB_FILE, MUSIC_DIR } from './constants'
+import { isValidId, sanitizeManifest } from './validate'
 
 export function readJSON(path, fallback) {
   try {
@@ -73,6 +74,7 @@ export function isDownloaded(lib, id) {
  * as playlists e devolve a lista do que falta baixar (na ordem das playlists).
  */
 export function applyManifest(lib, manifest) {
+  manifest = sanitizeManifest(manifest) // não confia nem no celular
   ensureDir(MUSIC_DIR)
   const nextTracks = {}
   const playlists = []
@@ -109,17 +111,24 @@ export function applyManifest(lib, manifest) {
   return { needed, removed }
 }
 
-/** Move um arquivo recebido para music/<id>.mp3 e registra na biblioteca. */
+/**
+ * Move um arquivo recebido para music/<id>.mp3 e registra na biblioteca.
+ * Só aceita faixas que estão no manifesto e cujo tamanho confere; o resto é apagado.
+ */
 export function adoptFile(lib, id, receivedPath) {
-  ensureDir(MUSIC_DIR)
   const src = relPath(receivedPath)
+  const expected = lib.tracks[id]
+  if (!isValidId(id) || !expected || src.indexOf('..') >= 0 || (expected.s && fileSize(src) !== expected.s)) {
+    if (src && src.indexOf('..') < 0) remove(src)
+    return null
+  }
+  ensureDir(MUSIC_DIR)
   const dst = trackPath(id)
   let final = dst
   if (src !== dst) {
     remove(dst)
     if (!move(src, dst)) final = src // se não der para mover, toca de onde está
   }
-  if (!lib.tracks[id]) lib.tracks[id] = { t: id, a: '' }
   lib.tracks[id].f = final
   saveLibrary(lib)
   return final
@@ -132,11 +141,11 @@ export function adoptLeftovers(lib, dir = 'download') {
     const m = /^(.+)\.mp3$/.exec(name)
     if (!m) continue
     const id = m[1]
+    if (!isValidId(id)) continue
     const t = lib.tracks[id]
     const path = `${dir}/${name}`
     if (t && !isDownloaded(lib, id) && t.s && fileSize(path) === t.s) {
-      adoptFile(lib, id, path)
-      n++
+      if (adoptFile(lib, id, path)) n++
     }
   }
   return n

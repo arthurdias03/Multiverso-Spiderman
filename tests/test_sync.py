@@ -98,10 +98,10 @@ if __name__ == "__main__":
 
 
 class TestManifestAndServer(unittest.TestCase):
-    def test_manifest_and_token(self):
+    TOKEN = "t" * 40
+
+    def setUp(self):
         import threading
-        import urllib.error
-        import urllib.request
 
         from trex_sync.server import make_server
         from trex_sync.sync import write_manifest
@@ -110,31 +110,156 @@ class TestManifestAndServer(unittest.TestCase):
         lib = tmp / "lib"
         lib.mkdir()
         (lib / "Queen - Bohemian Rhapsody.mp3").write_bytes(b"ID3abc")
-        out = tmp / "out"
+        self.out = tmp / "out"
         r = sync_playlist("p1", "Rock", [T("2", "Queen", "Bohemian Rhapsody"), T("3", "X", "Y")],
-                          Library.scan([lib]), State(out / ".trex_state.json"), out)
-        write_manifest([r], out)
-        m = json.loads((out / "manifest.json").read_text())
-        self.assertEqual(m["playlists"][0]["id"], "p1")
+                          Library.scan([lib]), State(self.out / ".trex_state.json"), self.out)
+        write_missing([r], self.out)
+        write_manifest([r], self.out)
+        (tmp / "segredo.txt").write_text("senha do PC")
+        (self.out / "Rock" / "link.mp3").symlink_to(tmp / "segredo.txt")
+        self.srv = make_server(self.out, 0, self.TOKEN, "127.0.0.1")
+        threading.Thread(target=self.srv.serve_forever, daemon=True).start()
+        self.base = f"http://127.0.0.1:{self.srv.server_address[1]}"
+
+    def tearDown(self):
+        self.srv.shutdown()
+        self.srv.server_close()
+
+    def get(self, path, token=None):
+        import urllib.error
+        import urllib.request
+
+        req = urllib.request.Request(self.base + path)
+        if token:
+            req.add_header("X-Trex-Token", token)
+        try:
+            with urllib.request.urlopen(req) as resp:
+                return resp.status, resp.read()
+        except urllib.error.HTTPError as e:
+            return e.code, b""
+
+    def test_manifest_content(self):
+        m = json.loads((self.out / "manifest.json").read_text())
         self.assertEqual(m["playlists"][0]["tracks"],
                          [{"id": "2", "t": "Bohemian Rhapsody", "a": "Queen",
                            "p": "Rock/Queen - Bohemian Rhapsody.mp3", "s": 6}])
 
-        srv = make_server(out, 0, "segredo")
-        port = srv.server_address[1]
-        threading.Thread(target=srv.serve_forever, daemon=True).start()
-        base = f"http://127.0.0.1:{port}"
-        try:
-            with self.assertRaises(urllib.error.HTTPError) as e:
-                urllib.request.urlopen(base + "/manifest.json")
-            self.assertEqual(e.exception.code, 401)
-            with urllib.request.urlopen(base + "/manifest.json?k=segredo") as resp:
-                self.assertEqual(json.load(resp)["version"], 1)
-            with urllib.request.urlopen(base + "/Rock/Queen%20-%20Bohemian%20Rhapsody.mp3?k=segredo") as resp:
-                self.assertEqual(resp.read(), b"ID3abc")
-            with self.assertRaises(urllib.error.HTTPError) as e:
-                urllib.request.urlopen(base + "/.trex_state.json?k=segredo")
-            self.assertEqual(e.exception.code, 404)
-        finally:
-            srv.shutdown()
-            srv.server_close()
+    def test_auth_header_only(self):
+        self.assertEqual(self.get("/manifest.json")[0], 401)
+        self.assertEqual(self.get(f"/manifest.json?k={self.TOKEN}")[0], 401)  # token na URL não vale
+        self.assertEqual(self.get("/manifest.json", "errado")[0], 401)
+        code, body = self.get("/manifest.json", self.TOKEN)
+        self.assertEqual((code, json.loads(body)["version"]), (200, 1))
+        code, body = self.get("/Rock/Queen%20-%20Bohemian%20Rhapsody.mp3", self.TOKEN)
+        self.assertEqual((code, body), (200, b"ID3abc"))
+
+    def test_only_manifest_files_are_served(self):
+        for path in ["/", "/Rock/", "/_FALTANDO.txt", "/.trex_state.json", "/_PARA_TRANSFERIR/Rock/Queen%20-%20Bohemian%20Rhapsody.mp3",
+                     "/../segredo.txt", "/Rock/../../segredo.txt", "/%2e%2e/segredo.txt", "/Rock/link.mp3"]:
+            self.assertEqual(self.get(path, self.TOKEN)[0], 404, path)
+
+    def test_symlink_in_manifest_is_blocked(self):
+        from trex_sync.server import Allowlist
+
+        m = json.loads((self.out / "manifest.json").read_text())
+        m["playlists"][0]["tracks"].append({"id": "9", "t": "x", "a": "y", "p": "Rock/link.mp3", "s": 1})
+        (self.out / "manifest.json").write_text(json.dumps(m))
+        self.assertIsNone(Allowlist(self.out).resolve("Rock/link.mp3"))
+
+    def test_bruteforce_lockout(self):
+        from trex_sync import server
+
+        for _ in range(server.MAX_FAILS):
+            self.get("/manifest.json", "chute")
+        self.assertEqual(self.get("/manifest.json", self.TOKEN)[0], 429)
+
+    def test_methods_and_weak_token(self):
+        import urllib.error
+        import urllib.request
+
+        from trex_sync.server import make_server
+
+        req = urllib.request.Request(self.base + "/manifest.json", data=b"x", method="POST")
+        with self.assertRaises(urllib.error.HTTPError) as e:
+            urllib.request.urlopen(req)
+        self.assertEqual(e.exception.code, 405)
+        with self.assertRaises(RuntimeError):
+            make_server(self.out, 0, "curto")
+
+
+class TestSecurityHelpers(unittest.TestCase):
+    def test_local_clients(self):
+        from trex_sync.server import is_local_client
+
+        for ip in ["127.0.0.1", "192.168.0.5", "10.1.2.3", "172.16.0.9", "100.101.102.103", "::1", "fe80::1"]:
+            self.assertTrue(is_local_client(ip), ip)
+        for ip in ["8.8.8.8", "200.160.2.3", "2001:4860::8888", "lixo"]:
+            self.assertFalse(is_local_client(ip), ip)
+
+    def test_token_generation_and_permissions(self):
+        import os
+        import stat
+
+        from trex_sync.server import load_or_create_token
+
+        tmp = Path(tempfile.mkdtemp())
+        tok = load_or_create_token("TROQUE-POR-UMA-SENHA-LONGA", tmp / ".tok")
+        self.assertGreaterEqual(len(tok), 40)
+        self.assertEqual(stat.S_IMODE(os.stat(tmp / ".tok").st_mode), 0o600)
+        self.assertEqual(load_or_create_token("", tmp / ".tok"), tok)  # estável
+        with self.assertRaises(RuntimeError):
+            load_or_create_token("senha123", tmp / ".tok")
+
+    def test_spotify_token_file_private(self):
+        import os
+        import stat
+
+        from trex_sync.spotify import SpotifyClient
+
+        tmp = Path(tempfile.mkdtemp())
+        sp = SpotifyClient("cid", tmp / "tok.json")
+        sp._save({"access_token": "a", "refresh_token": "r", "expires_at": 0})
+        self.assertEqual(stat.S_IMODE(os.stat(tmp / "tok.json").st_mode), 0o600)
+        with self.assertRaises(ValueError):
+            SpotifyClient("cid", tmp / "x.json", redirect_uri="http://192.168.0.2:8888/callback")
+
+    def test_ids_and_names(self):
+        from trex_sync.spotify import parse_playlist_id, track_from_json
+        from trex_sync.sync import safe_name
+
+        self.assertIsNone(track_from_json({"id": "../../etc", "name": "x", "type": "track"}))
+        with self.assertRaises(ValueError):
+            parse_playlist_id("https://evil.com/playlist/abc")
+        with self.assertRaises(ValueError):
+            parse_playlist_id("abc/../me")
+        for bad in ["..", ".", "...", "../x", ".ssh", "CON", ""]:
+            name = safe_name(bad)
+            self.assertNotIn("/", name)
+            self.assertFalse(name.startswith("."), bad)
+            self.assertNotIn(name.lower(), ("con",))
+
+    def test_playlist_named_dotdot_stays_inside(self):
+        tmp = Path(tempfile.mkdtemp())
+        lib = tmp / "lib"
+        lib.mkdir()
+        (lib / "A - B.mp3").write_bytes(b"x")
+        out = tmp / "out"
+        sync_playlist("p", "..", [T("1", "A", "B")], Library.scan([lib]), State(out / "s.json"), out)
+        self.assertFalse((tmp / "A - B.mp3").exists())
+        self.assertTrue(any(out.rglob("A - B.mp3")))
+
+    def test_downloader_argument_injection(self):
+        import unittest.mock as um
+
+        from trex_sync.sync import run_downloader
+
+        evil = Track("abc", "--exec=rm -rf ~", ("-oProxyCommand=x",), "", 0, "https://open.spotify.com/track/abc")
+        with um.patch("subprocess.run") as run:
+            run_downloader(["dl", "{artist}", "{title}", "{url}"], evil, Path(tempfile.mkdtemp()))
+            args = run.call_args[0][0]
+            self.assertTrue(all(not a.startswith("-") for a in args[1:]), args)
+            self.assertFalse(run.call_args.kwargs.get("shell"))
+        bad_url = Track("abc", "t", ("a",), "", 0, "file:///etc/passwd")
+        with um.patch("subprocess.run") as run:
+            run_downloader(["dl", "{url}"], bad_url, Path(tempfile.mkdtemp()))
+            run.assert_not_called()

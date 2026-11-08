@@ -59,7 +59,7 @@ python -m trex_sync status
 python -m trex_sync servir --sync   # para o app T-Rex Music do relógio (mesmo Wi-Fi do celular)
 ```
 
-Para o app do relógio, defina `server_token` no `config.json` e use `mp3_bitrate` de 96k a 128k: a transferência por Bluetooth é lenta.
+Para o app do relógio, use `mp3_bitrate` de 96k a 128k: a transferência por Bluetooth é lenta. O token do servidor é gerado automaticamente (`python -m trex_sync novo-token` troca). Veja [SECURITY.md](SECURITY.md) para o modelo de segurança e o acesso cifrado via Tailscale.
 
 Se você rodar `sync` de novo sem `confirmar`, as pendentes continuam pendentes. Nada é duplicado.
 

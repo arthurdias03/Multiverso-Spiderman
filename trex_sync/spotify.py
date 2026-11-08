@@ -6,6 +6,8 @@ import base64
 import hashlib
 import http.server
 import json
+import os
+import re
 import secrets
 import threading
 import time
@@ -21,6 +23,24 @@ TOKEN_URL = "https://accounts.spotify.com/api/token"
 API = "https://api.spotify.com/v1"
 SCOPES = "playlist-read-private playlist-read-collaborative user-library-read"
 LIKED = "liked"  # id especial para "Músicas Curtidas"
+# Escopos mínimos e SOMENTE LEITURA: mesmo que o token vaze, não dá para alterar a conta,
+# playlists, senha ou e-mail.
+_ID = re.compile(r"^[A-Za-z0-9]{1,64}$")
+_LOOPBACK = {"127.0.0.1", "localhost", "::1", "[::1]"}
+
+
+def write_private(path: Path, text: str) -> None:
+    """Grava arquivo com permissão 0600 (só o dono lê), de forma atômica."""
+    path = Path(path)
+    tmp = path.with_name(path.name + ".tmp")
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(tmp, path)
+    try:
+        os.chmod(path, 0o600)
+    except OSError:
+        pass
 
 
 @dataclass(frozen=True)
@@ -47,18 +67,25 @@ def parse_playlist_id(ref: str) -> str:
     if ref.lower() in (LIKED, "curtidas"):
         return LIKED
     if ref.startswith("spotify:playlist:"):
-        return ref.split(":")[-1]
-    if "open.spotify.com" in ref:
-        path = urllib.parse.urlparse(ref).path.rstrip("/").split("/")
-        if "playlist" in path:
-            return path[path.index("playlist") + 1]
-        raise ValueError(f"Link não é de playlist: {ref}")
-    return ref
+        pid = ref.split(":")[-1]
+    elif "open.spotify.com" in ref:
+        u = urllib.parse.urlparse(ref)
+        path = u.path.rstrip("/").split("/")
+        if u.hostname != "open.spotify.com" or "playlist" not in path or path.index("playlist") + 1 >= len(path):
+            raise ValueError(f"Link não é de playlist do Spotify: {ref}")
+        pid = path[path.index("playlist") + 1]
+    else:
+        pid = ref
+    if not _ID.match(pid):
+        raise ValueError(f"ID de playlist inválido: {ref}")
+    return pid
 
 
 def track_from_json(obj: dict | None) -> Track | None:
     """Converte um item da API em Track; ignora episódios, arquivos locais e faixas removidas."""
     if not obj or obj.get("type", "track") != "track" or obj.get("is_local") or not obj.get("id"):
+        return None
+    if not _ID.match(str(obj["id"])):
         return None
     return Track(
         id=obj["id"],
@@ -66,7 +93,7 @@ def track_from_json(obj: dict | None) -> Track | None:
         artists=tuple(a.get("name", "") for a in obj.get("artists", [])),
         album=(obj.get("album") or {}).get("name", ""),
         duration_ms=int(obj.get("duration_ms") or 0),
-        url=(obj.get("external_urls") or {}).get("spotify", f"https://open.spotify.com/track/{obj['id']}"),
+        url=f"https://open.spotify.com/track/{obj['id']}",
     )
 
 
@@ -74,6 +101,10 @@ class SpotifyClient:
     def __init__(self, client_id: str, token_file: Path, redirect_uri: str = "http://127.0.0.1:8888/callback"):
         if not client_id:
             raise ValueError("Defina 'spotify_client_id' no config.json")
+        u = urllib.parse.urlparse(redirect_uri)
+        if u.scheme != "http" or u.hostname not in _LOOPBACK:
+            # o código de autorização só pode voltar para esta máquina
+            raise ValueError("redirect_uri deve ser http://127.0.0.1:<porta>/... (loopback)")
         self.client_id = client_id
         self.token_file = Path(token_file)
         self.redirect_uri = redirect_uri
@@ -120,7 +151,9 @@ class SpotifyClient:
             def log_message(self, *args):
                 pass
 
-        server = http.server.HTTPServer((parsed.hostname or "127.0.0.1", parsed.port or 8888), Handler)
+        host = "127.0.0.1" if parsed.hostname in ("localhost", None) else parsed.hostname.strip("[]")
+        server = http.server.HTTPServer((host, parsed.port or 8888), Handler)
+        server.timeout = 300
         thread = threading.Thread(target=server.handle_request, daemon=True)
         thread.start()
         print("Abra este link para autorizar o acesso às suas playlists:\n" + url)
@@ -128,7 +161,7 @@ class SpotifyClient:
             webbrowser.open(url)
         thread.join(timeout=300)
         server.server_close()
-        if result.get("state") != state:
+        if not secrets.compare_digest(str(result.get("state", "")), state):
             raise RuntimeError("Login falhou ou expirou (state inválido).")
         if "error" in result:
             raise RuntimeError(f"Spotify recusou o login: {result['error']}")
@@ -148,11 +181,15 @@ class SpotifyClient:
     def _save(self, tok: dict) -> None:
         old = self._load() or {}
         tok.setdefault("refresh_token", old.get("refresh_token"))
-        self.token_file.write_text(json.dumps(tok, indent=2))
+        write_private(self.token_file, json.dumps(tok, indent=2))
         self._token = tok
 
     def _load(self) -> dict | None:
         if self._token is None and self.token_file.exists():
+            try:
+                os.chmod(self.token_file, 0o600)  # corrige arquivos antigos com permissão aberta
+            except OSError:
+                pass
             self._token = json.loads(self.token_file.read_text())
         return self._token
 

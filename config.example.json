@@ -12,5 +12,9 @@
   "downloader_command": [],
   "download_dir": "downloads",
   "server_port": 8765,
-  "server_token": "TROQUE-POR-UMA-SENHA-LONGA"
+  "server_token": "",
+  "server_bind": "auto",
+  "allow_public_clients": false,
+  "tls_cert": "",
+  "tls_key": ""
 }

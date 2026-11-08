@@ -3,6 +3,9 @@
  * Busca o manifesto no servidor do trex-sync, baixa os MP3 e transfere ao relógio, um por vez.
  */
 import { BaseSideService, settingsLib } from '@zeppos/zml/base-side'
+import { checkServerUrl, checkToken, sanitizeManifest, isValidId, isSafeRelPath, encodePath } from '../lib/validate'
+
+const TOKEN_HEADER = 'X-Trex-Token'
 
 const state = {
   queue: [],
@@ -12,18 +15,13 @@ const state = {
   done: 0,
 }
 
+/** Lê e valida a configuração. O token vai SÓ no cabeçalho (nunca na URL, que pode parar em logs). */
 function config() {
-  const url = String(settingsLib.getItem('serverUrl') || '').trim().replace(/\/+$/, '')
-  const token = String(settingsLib.getItem('token') || '').trim()
-  return { url, token }
-}
-
-function withToken(url, token) {
-  return token ? `${url}${url.indexOf('?') >= 0 ? '&' : '?'}k=${encodeURIComponent(token)}` : url
-}
-
-function encodePath(p) {
-  return String(p).split('/').map(encodeURIComponent).join('/')
+  const u = checkServerUrl(settingsLib.getItem('serverUrl'))
+  if (!u.ok) throw new Error(u.error)
+  const t = checkToken(settingsLib.getItem('token'))
+  if (!t.ok) throw new Error(t.error)
+  return { url: u.url, headers: { [TOKEN_HEADER]: t.token } }
 }
 
 AppSideService(
@@ -52,23 +50,22 @@ AppSideService(
     },
 
     async getManifest() {
-      const { url, token } = config()
-      if (!url) throw new Error('Configure o endereço do servidor no app Zepp')
-      const r = await this.fetch({ url: withToken(`${url}/manifest.json`, token), method: 'GET', timeout: 15000 })
+      const { url, headers } = config()
+      const r = await this.fetch({ url: `${url}/manifest.json`, method: 'GET', headers, timeout: 15000 })
       if (r.status === 401) throw new Error('Token inválido')
+      if (r.status === 429) throw new Error('Bloqueado por tentativas erradas; aguarde 15 min')
       if (r.status !== 200) throw new Error(`Servidor respondeu ${r.status}`)
-      const m = typeof r.body === 'string' ? JSON.parse(r.body) : r.body
-      return {
-        generated: m.generated,
-        playlists: (m.playlists || []).map((pl) => ({
-          id: pl.id,
-          name: pl.name,
-          tracks: (pl.tracks || []).map((t) => ({ id: t.id, t: t.t, a: t.a, p: t.p, s: t.s })),
-        })),
+      let m
+      try {
+        m = typeof r.body === 'string' ? JSON.parse(r.body) : r.body
+      } catch (e) {
+        throw new Error('Resposta inválida do servidor')
       }
+      return sanitizeManifest(m) // descarta IDs/caminhos inválidos e limita tamanhos
     },
 
     enqueue(items) {
+      items = (Array.isArray(items) ? items : []).filter((i) => i && isValidId(i.id) && isSafeRelPath(i.p))
       const known = {}
       state.queue.forEach((i) => (known[i.id] = true))
       if (state.current) known[state.current.id] = true
@@ -112,7 +109,15 @@ AppSideService(
         return
       }
       state.busy = true
-      const { url, token } = config()
+      let cfg
+      try {
+        cfg = config()
+      } catch (e) {
+        state.queue = []
+        state.busy = false
+        state.current = null
+        return this.notify({ finished: true, error: e.message })
+      }
       const cur = { id: item.id }
       state.current = cur
       const fail = (msg) => {
@@ -121,9 +126,10 @@ AppSideService(
         this.processNext()
       }
 
-      const task = this.download(withToken(`${url}/${encodePath(item.p)}`, token), {
+      const task = this.download(`${cfg.url}/${encodePath(item.p)}`, {
+        headers: cfg.headers,
         timeout: 180000,
-        filePath: `${item.id}.mp3`,
+        filePath: `${item.id}.mp3`, // id validado: [A-Za-z0-9]{1,64}
       })
       cur.download = task
       let lastPct = -1
@@ -140,7 +146,7 @@ AppSideService(
         const path = ev.filePath || ev.tempFilePath || `data://download/${item.id}.mp3`
         let file
         try {
-          file = this.sendFile(path, { id: item.id, s: String(item.s || '') })
+          file = this.sendFile(path, { id: item.id, s: String(item.s || '') }) // nada de token aqui
         } catch (e) {
           return fail('transferência indisponível')
         }

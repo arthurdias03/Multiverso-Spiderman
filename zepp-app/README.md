@@ -37,7 +37,20 @@ PC: python -m trex_sync servir ──HTTP (Wi-Fi)──> Celular: app Zepp (side
    zeus preview      # escolha o T-Rex 3; aparece um QR code
    ```
 5. No app Zepp: Perfil → Developer Mode → Scan, e leia o QR. O app é instalado no relógio.
-6. No app Zepp: Perfil → T-Rex 3 → Apps → T-Rex Music → Configurações. Preencha o **endereço** e o **token** que o `python -m trex_sync servir` mostra.
+6. No app Zepp: Perfil → T-Rex 3 → Apps → T-Rex Music → Configurações. Preencha o **endereço** e o **token** que o `python -m trex_sync servir` mostra. A tela mostra se a configuração é válida e se a conexão é cifrada.
+
+Segurança: veja [`../SECURITY.md`](../SECURITY.md). O app nunca recebe credenciais do Spotify; o token só dá acesso às músicas que o seu PC serve.
+
+## iPhone
+
+Funciona pelo **modo desenvolvedor do app Zepp**, que existe também no iOS. Não existe outro caminho fora da loja do Zepp.
+
+1. **Você precisa de um computador** (Windows, Mac ou Linux) com Node 18+ para gerar o QR (`zeus preview`). O iPhone sozinho não compila o app.
+2. No iPhone: app Zepp → Perfil → Configurações → Sobre → toque 7× no logo → "Developer Mode" aparece em Perfil.
+3. Developer Mode → Scan → leia o QR do `zeus preview`. O app é instalado no relógio.
+4. Na primeira sincronização, o iOS pode perguntar se o **Zepp pode acessar dispositivos na rede local**: responda **Permitir**. Se negou, reative em Ajustes → Privacidade e Segurança → Rede Local → Zepp.
+5. **Mantenha o app Zepp aberto na tela** durante a sincronização. O iOS suspende apps em segundo plano, e o serviço que baixa as músicas roda dentro do app Zepp.
+6. Se a conexão `http://IP-do-PC` não funcionar no iPhone, use o endereço HTTPS do Tailscale (veja `../SECURITY.md`). Ele também é a opção mais segura.
 
 ## Uso diário
 

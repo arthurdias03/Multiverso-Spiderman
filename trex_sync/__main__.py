@@ -65,13 +65,27 @@ def cmd_confirm(cfg: Config, args) -> int:
 
 
 def cmd_serve(cfg: Config, args) -> int:
-    from .server import serve
+    from .server import load_or_create_token, serve
 
     if args.sync:
         rc = cmd_sync(cfg, args)
         if rc:
             return rc
-    serve(cfg.out, args.port or cfg.server_port, cfg.server_token)
+    token = load_or_create_token(cfg.server_token, cfg.server_token_file)
+    serve(cfg.out, args.port or cfg.server_port, token, bind=cfg.server_bind,
+          allow_public=cfg.allow_public_clients,
+          tls_cert=str(cfg.resolve(cfg.tls_cert)) if cfg.tls_cert else "",
+          tls_key=str(cfg.resolve(cfg.tls_key)) if cfg.tls_key else "")
+    return 0
+
+
+def cmd_new_token(cfg: Config, args) -> int:
+    from .server import rotate_token
+
+    if cfg.server_token:
+        print("server_token está fixo no config.json; apague-o de lá para usar token automático.")
+        return 1
+    print("Novo token (atualize no app Zepp):", rotate_token(cfg.server_token_file))
     return 0
 
 
@@ -96,11 +110,12 @@ def main(argv: list[str] | None = None) -> int:
     sv = sub.add_parser("servir", help="serve as músicas para o app T-Rex Music do relógio")
     sv.add_argument("--port", type=int, default=0)
     sv.add_argument("--sync", action="store_true", help="roda o sync antes de servir")
+    sub.add_parser("novo-token", help="gera um novo token do servidor (invalida o antigo)")
     args = ap.parse_args(argv)
     try:
         cfg = Config.load(args.config)
-        return {"login": cmd_login, "sync": cmd_sync, "confirmar": cmd_confirm, "status": cmd_status, "servir": cmd_serve}[args.cmd](cfg, args)
-    except (FileNotFoundError, ValueError, RuntimeError) as e:
+        return {"login": cmd_login, "sync": cmd_sync, "confirmar": cmd_confirm, "status": cmd_status, "servir": cmd_serve, "novo-token": cmd_new_token}[args.cmd](cfg, args)
+    except (FileNotFoundError, ValueError, RuntimeError, OSError) as e:
         print("Erro:", e, file=sys.stderr)
         return 2
 

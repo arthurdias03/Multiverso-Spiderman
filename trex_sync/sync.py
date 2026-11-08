@@ -16,9 +16,24 @@ TRANSFER_DIR = "_PARA_TRANSFERIR"
 MISSING_FILE = "_FALTANDO.txt"
 
 
+_WIN_RESERVED = {"con", "prn", "aux", "nul", *(f"com{i}" for i in range(1, 10)), *(f"lpt{i}" for i in range(1, 10))}
+
+
 def safe_name(text: str, limit: int = 120) -> str:
-    text = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "", text).strip().rstrip(".")
-    return (text or "sem nome")[:limit]
+    """Nome seguro para arquivo/pasta: sem separadores, sem controle, sem '.'/'..', sem nomes reservados."""
+    text = re.sub(r'[<>:"/\\|?*\x00-\x1f\x7f]', "", text or "")
+    text = text.strip().lstrip(".").strip().rstrip(". ")[:limit].rstrip(". ")
+    if not text or text.split(".")[0].lower() in _WIN_RESERVED:
+        text = f"_{text}" if text else "sem nome"
+    return text
+
+
+def inside(root: Path, path: Path) -> Path:
+    """Garante que 'path' fica dentro de 'root' (defesa contra path traversal)."""
+    r, p = root.resolve(), path.resolve()
+    if p != r and r not in p.parents:
+        raise RuntimeError(f"Caminho fora da pasta de saída bloqueado: {path}")
+    return path
 
 
 def file_name_for(track: Track) -> str:
@@ -79,14 +94,31 @@ def export_audio(src: Path, dst: Path, convert: bool, bitrate: str) -> Path:
     return dst
 
 
+_SPOTIFY_TRACK_URL = re.compile(r"^https://open\.spotify\.com/track/[A-Za-z0-9]{1,64}$")
+
+
+def _arg_value(text: str, limit: int = 150) -> str:
+    """Metadados vêm de terceiros (playlists públicas/colaborativas): remove controle e '-' inicial
+    para que um título como '--exec=...' não vire opção do programa externo."""
+    text = re.sub(r"[\x00-\x1f\x7f]", "", text or "")[:limit]
+    return text.lstrip("-").strip() or "sem nome"
+
+
 def run_downloader(cmd_template: list[str], track: Track, out_dir: Path) -> None:
-    """Executa o comando externo configurado pelo usuário para obter uma faixa ausente."""
+    """Executa o comando externo configurado pelo usuário para obter uma faixa ausente.
+    Nunca usa shell: cada item da lista é um argumento separado."""
+    if not _SPOTIFY_TRACK_URL.match(track.url or ""):
+        return
     out_dir.mkdir(parents=True, exist_ok=True)
-    values = {"url": track.url, "dir": str(out_dir), "artist": track.artist, "title": track.title}
+    values = {"url": track.url, "dir": str(out_dir), "artist": _arg_value(track.artist),
+              "title": _arg_value(track.title)}
     # substitui só os marcadores conhecidos; outros (ex.: {output-ext} do spotDL) ficam intactos
     pattern = re.compile(r"\{(" + "|".join(values) + r")\}")
     cmd = [pattern.sub(lambda m: values[m.group(1)], part) for part in cmd_template]
-    subprocess.run(cmd, check=False)
+    try:
+        subprocess.run(cmd, check=False, shell=False, timeout=600)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
 
 
 def sync_playlist(
@@ -104,8 +136,8 @@ def sync_playlist(
     pl = state.playlist(pid)
     pl["name"] = name
     folder = safe_name(name)
-    mirror = out_root / folder
-    transfer = out_root / TRANSFER_DIR / folder
+    mirror = inside(out_root, out_root / folder)
+    transfer = inside(out_root, out_root / TRANSFER_DIR / folder)
     report = PlaylistReport(name=name, total=len(tracks))
 
     # Remove duplicatas mantendo a ordem da playlist

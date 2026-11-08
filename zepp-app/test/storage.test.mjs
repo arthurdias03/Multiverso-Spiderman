@@ -18,4 +18,13 @@ r = S.applyManifest(lib, m2)
 assert.deepStrictEqual(r.needed.map(i => i.id), ['c']); assert.strictEqual(r.removed, 1)
 assert.ok(!files.has('music/a.mp3') && files.has('music/b.mp3'))
 assert.strictEqual(S.relPath('/data/download/x.mp3'), 'download/x.mp3')
+// arquivo inesperado: id fora do manifesto, id malicioso ou tamanho diferente -> descartado
+files.set('download/zzz.mp3', 'x'); assert.strictEqual(S.adoptFile(lib, 'zzz', 'download/zzz.mp3'), null)
+assert.ok(!files.has('download/zzz.mp3'))
+files.set('download/c.mp3', 'curto'.slice(0, 2)); assert.strictEqual(S.adoptFile(lib, 'c', 'download/c.mp3'), null)
+assert.strictEqual(S.adoptFile(lib, '../x', 'download/c.mp3'), null)
+// manifesto malicioso não cria entradas
+lib = S.loadLibrary()
+r = S.applyManifest(lib, { playlists: [{ id: 'p', name: 'R', tracks: [{ id: '../../x', p: 'R/x.mp3', s: 1 }, { id: 'ok', p: '../x.mp3', s: 1 }] }] })
+assert.deepStrictEqual(r.needed, [])
 console.log('JS OK')

@@ -17,7 +17,11 @@ class Config:
     downloader_command: list[str] = field(default_factory=list)
     download_dir: str = "downloads"
     server_port: int = 8765
-    server_token: str = ""
+    server_token: str = ""          # vazio = gera um aleatório em .trex_server_token (0600)
+    server_bind: str = "auto"       # "auto" = só a interface da rede local
+    allow_public_clients: bool = False
+    tls_cert: str = ""
+    tls_key: str = ""
     base: Path = Path(".")
 
     @classmethod
@@ -46,3 +50,7 @@ class Config:
     @property
     def token_file(self) -> Path:
         return self.base / ".spotify_token.json"
+
+    @property
+    def server_token_file(self) -> Path:
+        return self.base / ".trex_server_token"

@@ -9,6 +9,7 @@ import {
   loadLibrary, applyManifest, adoptFile, adoptLeftovers, playableTracks,
 } from '../lib/storage'
 import { currentState } from '../lib/player-control'
+import { isValidId } from '../lib/validate'
 
 const LIST_Y = 250
 
@@ -25,8 +26,8 @@ function fileId(file) {
       params = {}
     }
   }
-  if (params && params.id) return params.id
-  return String(file.fileName || '').replace(/\.mp3$/, '')
+  const id = params && params.id ? String(params.id) : String(file.fileName || '').replace(/\.mp3$/, '')
+  return isValidId(id) ? id : null
 }
 
 Page(
@@ -147,7 +148,7 @@ Page(
         this.state.syncing = false
         this.keepAwake(false)
         this.refreshCounts()
-        setText(this.state.status, 'Sincronização concluída.')
+        setText(this.state.status, p.error ? `Falha: ${p.error}` : 'Sincronização concluída.')
         return
       }
       if (p.error) {
@@ -165,7 +166,9 @@ Page(
       file.on('change', (event) => {
         const st = event && event.data && event.data.readyState
         if (st === 'transferred') {
-          adoptFile(this.state.lib, id, file.filePath || `download/${file.fileName}`)
+          // arquivo inesperado (id inválido, fora do manifesto ou tamanho errado) é descartado
+          const ok = id && adoptFile(this.state.lib, id, file.filePath || `download/${file.fileName}`)
+          if (!ok) showToast({ content: 'Arquivo inesperado descartado' })
           this.refreshCounts()
         }
       })

@@ -4,3 +4,7 @@ saida/
 downloads/
 __pycache__/
 *.pyc
+.trex_server_token
+*.tmp
+*.pem
+*.key
