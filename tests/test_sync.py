@@ -263,3 +263,53 @@ class TestSecurityHelpers(unittest.TestCase):
         with um.patch("subprocess.run") as run:
             run_downloader(["dl", "{url}"], bad_url, Path(tempfile.mkdtemp()))
             run.assert_not_called()
+
+
+class TestLinks(unittest.TestCase):
+    def test_track_extra_fields(self):
+        t = track_from_json({"id": "abc123", "name": "Faixa de Exemplo", "type": "track", "duration_ms": 222000,
+                             "artists": [{"name": "Banda Fictícia"}],
+                             "album": {"name": "Álbum Demo", "release_date": "2019-05-01"},
+                             "external_ids": {"isrc": "brxyz1900001"}})
+        self.assertEqual((t.isrc, t.year), ("BRXYZ1900001", "2019"))
+        bad = track_from_json({"id": "abc", "name": "x", "type": "track", "external_ids": {"isrc": "<script>"}})
+        self.assertEqual(bad.isrc, "")
+
+    def test_write_links_txt_and_csv(self):
+        import csv
+
+        from trex_sync.links import write_links
+
+        t = Track("abc123", "Faixa de Exemplo", ("Banda Fictícia",), "Álbum Demo", 222000,
+                  "https://open.spotify.com/track/abc123", "BRXYZ1900001", "2019")
+        out = Path(tempfile.mkdtemp()) / "LINKS.txt"
+        txt, csv_path = write_links([("Rock Exemplo", [t]), ("Vazia", [])], out, "teste")
+        body = txt.read_text(encoding="utf-8")
+        for expected in ["== Rock Exemplo (1) ==", "Banda Fictícia – Faixa de Exemplo", "Álbum Demo (2019) · 3:42 · ISRC: BRXYZ1900001",
+                         "https://open.spotify.com/track/abc123", "https://song.link/s/abc123",
+                         "https://music.apple.com/br/search?term=Banda%20Fict%C3%ADcia%20Faixa%20de%20Exemplo"]:
+            self.assertIn(expected, body)
+        self.assertNotIn("Vazia", body)
+        rows = list(csv.reader(open(csv_path, encoding="utf-8-sig"), delimiter=";"))
+        self.assertEqual(rows[1][:7], ["Rock Exemplo", "Banda Fictícia", "Faixa de Exemplo", "Álbum Demo", "2019", "3:42", "BRXYZ1900001"])
+        self.assertIsNone(write_links([("x", [])], out, "teste"))
+        self.assertFalse(out.exists())
+
+    def test_run_links_with_fake_spotify(self):
+        import unittest.mock as um
+
+        from trex_sync.config import Config
+        from trex_sync.runner import run_links
+
+        tmp = Path(tempfile.mkdtemp())
+        (tmp / "config.json").write_text(json.dumps({"spotify_client_id": "cid", "playlists": ["liked"], "output_dir": "saida"}))
+        cfg = Config.load(tmp / "config.json")
+        fake = um.MagicMock()
+        fake.playlist_name.return_value = "Favoritas (exemplo)"
+        fake.playlist_tracks.return_value = [T("a1", "Banda Fictícia", "Faixa 1"), T("a1", "Banda Fictícia", "Faixa 1"),
+                                             T("a2", "Os Exemplares", "Faixa 2")]
+        with um.patch("trex_sync.runner.SpotifyClient", return_value=fake):
+            txt, _ = run_links(cfg, log=lambda m: None)
+        body = txt.read_text(encoding="utf-8")
+        self.assertIn("2 música(s)", body)  # duplicata removida
+        self.assertEqual(txt.name, "LINKS_PLAYLISTS.txt")

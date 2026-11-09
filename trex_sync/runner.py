@@ -12,6 +12,7 @@ from .spotify import SpotifyClient, parse_playlist_id, write_private
 from .sync import PlaylistReport, State, sync_playlist, write_manifest, write_missing
 
 SUMMARY_FILE = ".panel_summary.json"
+LINKS_FILE = "LINKS_PLAYLISTS.txt"
 
 
 def run_sync(cfg: Config, log: Callable[[str], None] = print) -> list[PlaylistReport]:
@@ -44,13 +45,37 @@ def run_sync(cfg: Config, log: Callable[[str], None] = print) -> list[PlaylistRe
     return reports
 
 
+def run_links(cfg: Config, log: Callable[[str], None] = print):
+    """Gera LINKS_PLAYLISTS.txt/.csv com TODAS as faixas das playlists (não precisa de biblioteca)."""
+    from .links import write_links
+
+    if not cfg.playlists:
+        raise RuntimeError("Nenhuma playlist configurada.")
+    sp = SpotifyClient(cfg.spotify_client_id, cfg.token_file, cfg.redirect_uri)
+    groups = []
+    for ref in cfg.playlists:
+        pid = parse_playlist_id(ref)
+        name = sp.playlist_name(pid)
+        log(f"Lendo a playlist \"{name}\" no Spotify...")
+        seen, tracks = set(), []
+        for t in sp.playlist_tracks(pid):
+            if t.id not in seen:
+                seen.add(t.id)
+                tracks.append(t)
+        groups.append((name, tracks))
+    res = write_links(groups, cfg.out / LINKS_FILE, "links de todas as músicas das suas playlists")
+    if res:
+        log(f"Lista gerada: {res[0]} (e {res[1].name} para planilha)")
+    return res
+
+
 def save_summary(cfg: Config, reports: list[PlaylistReport]) -> None:
     data = {
         "time": int(time.time()),
         "playlists": [
             {
                 "id": r.playlist_id, "name": r.name, "total": r.total, "ready": len(r.entries),
-                "missing": [{"artist": t.artist, "title": t.title, "url": t.url} for t in r.missing],
+                "missing": [{"id": t.id, "artist": t.artist, "title": t.title, "url": t.url} for t in r.missing],
             }
             for r in reports
         ],

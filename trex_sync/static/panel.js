@@ -102,7 +102,8 @@ function render(s) {
       el('div', {},
         el('a', { href: `https://bandcamp.com/search?q=${q(m)}`, target: '_blank', rel: 'noopener noreferrer' }, 'Bandcamp'),
         el('a', { href: `https://music.apple.com/br/search?term=${q(m)}`, target: '_blank', rel: 'noopener noreferrer' }, 'iTunes'),
-        el('a', { href: m.url, target: '_blank', rel: 'noopener noreferrer' }, 'Spotify'))))
+        el('a', { href: m.url, target: '_blank', rel: 'noopener noreferrer', title: 'Ouvir a versão exata' }, 'Spotify'),
+        el('a', { href: `https://song.link/s/${encodeURIComponent(m.id || '')}`, target: '_blank', rel: 'noopener noreferrer', title: 'A mesma gravação em outros apps' }, 'Outros apps'))))
     : [el('p', { class: 'muted' }, 'Nada faltando. 🎉')]))
 
   const cfg = s.settings
@@ -154,6 +155,8 @@ $('btn-login').onclick = act(() => api('/api/login', { method: 'POST' }), 'Autor
 $('btn-sync').onclick = act(() => api('/api/sync', { method: 'POST' }), 'Sincronização iniciada')
 $('btn-open').onclick = act(() => api('/api/open-library', { method: 'POST' }))
 $('btn-server').onclick = act(() => api(state && state.server.running ? '/api/server/stop' : '/api/server/start', { method: 'POST' }))
+$('btn-links').onclick = act(() => api('/api/links', { method: 'POST' }), 'Gerando LINKS_PLAYLISTS.txt...')
+$('btn-open-missing').onclick = act(() => api('/api/open-file', { method: 'POST', body: { name: '_FALTANDO.txt' } }))
 $('btn-token').onclick = act(() => api('/api/token/new', { method: 'POST' }), 'Novo token gerado')
 const saveAuto = act(() => api('/api/auto', { method: 'POST', body: { enabled: $('auto').checked, minutes: Number($('auto-min').value) || 10 } }))
 $('auto').onchange = saveAuto

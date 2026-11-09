@@ -31,6 +31,15 @@ def cmd_sync(cfg: Config, args) -> int:
     return 0
 
 
+def cmd_links(cfg: Config, args) -> int:
+    from .runner import run_links
+
+    res = run_links(cfg)
+    if not res:
+        print("Nenhuma música encontrada nas playlists.")
+    return 0
+
+
 def cmd_confirm(cfg: Config, args) -> int:
     n = confirm_transfer(State(cfg.state_file), cfg.out)
     print(f"{n} faixa(s) marcadas como transferidas.")
@@ -96,6 +105,7 @@ def main(argv: list[str] | None = None) -> int:
     lg = sub.add_parser("login", help="autoriza acesso às suas playlists do Spotify")
     lg.add_argument("--no-browser", action="store_true")
     sub.add_parser("sync", help="gera a pasta com as músicas novas de cada playlist")
+    sub.add_parser("links", help="gera LINKS_PLAYLISTS.txt/.csv com links de todas as músicas (sem baixar)")
     sub.add_parser("confirmar", help="marca as pendentes como já transferidas para o relógio")
     sub.add_parser("status", help="mostra o estado por playlist")
     sv = sub.add_parser("servir", help="serve as músicas para o app spotifiBR do relógio")
@@ -115,7 +125,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
     try:
         cfg = Config.load(args.config)
-        return {"login": cmd_login, "sync": cmd_sync, "confirmar": cmd_confirm, "status": cmd_status, "servir": cmd_serve, "novo-token": cmd_new_token}[args.cmd](cfg, args)
+        return {"login": cmd_login, "links": cmd_links, "sync": cmd_sync, "confirmar": cmd_confirm, "status": cmd_status, "servir": cmd_serve, "novo-token": cmd_new_token}[args.cmd](cfg, args)
     except (FileNotFoundError, ValueError, RuntimeError, OSError) as e:
         print("Erro:", e, file=sys.stderr)
         return 2

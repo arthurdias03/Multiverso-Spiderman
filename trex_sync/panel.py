@@ -24,7 +24,7 @@ from pathlib import Path
 
 from .config import Config
 from .library import AUDIO_EXT
-from .runner import load_summary, run_sync
+from .runner import LINKS_FILE, load_summary, run_links, run_sync
 from .spotify import SpotifyClient, parse_playlist_id
 from .sync import safe_name
 
@@ -88,6 +88,22 @@ class Engine:
             self.emit(f"Concluído: {new} nova(s) para o relógio, {miss} sem arquivo")
             self.fingerprint = self._library_fingerprint()
         return self._task("Sincronizando", job)
+
+    def links(self) -> bool:
+        def job():
+            self.emit("Gerando a lista de links de todas as músicas...")
+            run_links(self.cfg(), self.emit)
+        return self._task("Gerando lista de links", job)
+
+    def open_output(self, name: str) -> None:
+        cfg = self.cfg()
+        if name not in (LINKS_FILE, "_FALTANDO.txt"):
+            raise ValueError("Arquivo não permitido")
+        path = cfg.out / name
+        if not path.exists():
+            raise ValueError("A lista ainda não foi gerada")
+        opener = {"darwin": ["open"], "win32": ["cmd", "/c", "start", ""]}.get(sys.platform, ["xdg-open"])
+        subprocess.Popen(opener + [str(path)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def login(self) -> bool:
         def job():
@@ -331,6 +347,11 @@ def make_panel(engine: Engine, port: int = 8770, token: str | None = None):
                 data = self._json_body()
                 if path == "/api/sync":
                     ok = engine.sync()
+                elif path == "/api/links":
+                    ok = engine.links()
+                elif path == "/api/open-file":
+                    engine.open_output(str(data.get("name", "")))
+                    ok = True
                 elif path == "/api/login":
                     ok = engine.login()
                 elif path == "/api/server/start":

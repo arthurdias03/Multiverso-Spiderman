@@ -1,0 +1,32 @@
+spotifiBR · EXEMPLO com dados fictícios
+Gerado em 09/11/2026 01:24 · 3 música(s)
+Dica: abra o link do Spotify para ouvir a versão exata e confira álbum, ano, duração e ISRC
+na loja antes de comprar. O link 'Mesma gravação' abre essa versão em outros apps.
+
+== Rock Exemplo (2) ==
+
+1. Banda Fictícia – Faixa de Exemplo
+   Álbum: Álbum Demonstração (2019) · 3:42 · ISRC: BRXXX1900001
+   Spotify (versão exata) ......: https://open.spotify.com/track/EXEMPLO0000000000000001
+   Mesma gravação em outros apps: https://song.link/s/EXEMPLO0000000000000001
+   Buscar no Apple Music .......: https://music.apple.com/br/search?term=Banda%20Fict%C3%ADcia%20Faixa%20de%20Exemplo
+   Buscar no Bandcamp ..........: https://bandcamp.com/search?q=Banda%20Fict%C3%ADcia%20Faixa%20de%20Exemplo
+   Buscar no YouTube Music .....: https://music.youtube.com/search?q=Banda%20Fict%C3%ADcia%20Faixa%20de%20Exemplo
+
+2. Os Exemplares – Ritmo de Teste
+   Álbum: Ao Vivo (Exemplo) (2021) · 4:11 · ISRC: BRXXX2100002
+   Spotify (versão exata) ......: https://open.spotify.com/track/EXEMPLO0000000000000002
+   Mesma gravação em outros apps: https://song.link/s/EXEMPLO0000000000000002
+   Buscar no Apple Music .......: https://music.apple.com/br/search?term=Os%20Exemplares%20Ritmo%20de%20Teste
+   Buscar no Bandcamp ..........: https://bandcamp.com/search?q=Os%20Exemplares%20Ritmo%20de%20Teste
+   Buscar no YouTube Music .....: https://music.youtube.com/search?q=Os%20Exemplares%20Ritmo%20de%20Teste
+
+== Treino Demo (1) ==
+
+1. DJ Placeholder – Pulso 120
+   Álbum: Single Fictício (2023) · 3:08 · ISRC: BRXXX2300003
+   Spotify (versão exata) ......: https://open.spotify.com/track/EXEMPLO0000000000000003
+   Mesma gravação em outros apps: https://song.link/s/EXEMPLO0000000000000003
+   Buscar no Apple Music .......: https://music.apple.com/br/search?term=DJ%20Placeholder%20Pulso%20120
+   Buscar no Bandcamp ..........: https://bandcamp.com/search?q=DJ%20Placeholder%20Pulso%20120
+   Buscar no YouTube Music .....: https://music.youtube.com/search?q=DJ%20Placeholder%20Pulso%20120

@@ -220,14 +220,9 @@ def confirm_transfer(state: State, out_root: Path) -> int:
 
 
 def write_missing(reports: list[PlaylistReport], out_root: Path) -> Path | None:
-    path = out_root / MISSING_FILE
-    lines = []
-    for r in reports:
-        for t in r.missing:
-            lines.append(f"[{r.name}] {t.display}  ->  {t.url}")
-    if not lines:
-        path.unlink(missing_ok=True)
-        return None
-    out_root.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    return path
+    """_FALTANDO.txt/.csv: faixas sem arquivo local, com links para ouvir e conferir a versão."""
+    from .links import write_links
+
+    res = write_links([(r.name, r.missing) for r in reports], out_root / MISSING_FILE,
+                      "músicas que faltam na sua biblioteca")
+    return res[0] if res else None

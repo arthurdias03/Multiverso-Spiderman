@@ -25,7 +25,20 @@ O Spotify não permite exportar o áudio: ele é criptografado e só toca dentro
 | **Compras na iTunes Store** (app Apple Music/iTunes) | compra | AAC 256k | Sem proteção; o trex-sync converte para MP3. Músicas da **assinatura** Apple Music são protegidas e **não** servem |
 | Jamendo, Free Music Archive, Internet Archive | grátis | varia | Músicas liberadas pelos autores |
 
-O trex-sync lê a sua playlist e gera `saida/_FALTANDO.txt`, a lista das músicas que você ainda não tem em arquivo, cada uma com o link. Use essa lista como lista de compras.
+### Listas de links (para achar a versão certa, sem baixar nada)
+
+| Arquivo | O que tem | Como gerar |
+|---|---|---|
+| `saida/LINKS_PLAYLISTS.txt` + `.csv` | **Todas** as músicas das suas playlists | Painel → **Gerar links de todas as músicas**, ou `python -m trex_sync links` |
+| `saida/_FALTANDO.txt` + `.csv` | Só as que ainda **não estão** na sua biblioteca | Automático a cada sincronização |
+
+Cada música vem com:
+- o **link exato do Spotify**, para ouvir a versão certa;
+- o link **"mesma gravação em outros apps"** (song.link), que abre essa gravação em Apple Music, YouTube Music, Deezer, Amazon e outros;
+- **álbum, ano, duração e ISRC**, o código único da gravação, para conferir na loja antes de comprar;
+- buscas prontas no Apple Music, Bandcamp e YouTube Music.
+
+O `.csv` abre no Excel ou no Google Planilhas. Veja o formato em [docs/exemplos/LINKS_EXEMPLO.txt](docs/exemplos/LINKS_EXEMPLO.txt) (dados fictícios).
 
 ## spotifiBR Desktop (o app do computador)
 

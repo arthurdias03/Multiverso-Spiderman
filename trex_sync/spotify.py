@@ -51,6 +51,8 @@ class Track:
     album: str
     duration_ms: int
     url: str
+    isrc: str = ""       # código único da gravação: identifica a versão exata
+    year: str = ""
 
     @property
     def artist(self) -> str:
@@ -94,7 +96,14 @@ def track_from_json(obj: dict | None) -> Track | None:
         album=(obj.get("album") or {}).get("name", ""),
         duration_ms=int(obj.get("duration_ms") or 0),
         url=f"https://open.spotify.com/track/{obj['id']}",
+        isrc=_clean_code((obj.get("external_ids") or {}).get("isrc", "")),
+        year=str((obj.get("album") or {}).get("release_date") or "")[:4],
     )
+
+
+def _clean_code(value) -> str:
+    v = str(value or "").strip().upper()
+    return v if re.fullmatch(r"[A-Z0-9]{12}", v) else ""
 
 
 class SpotifyClient:
