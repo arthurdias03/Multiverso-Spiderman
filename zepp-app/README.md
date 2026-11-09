@@ -6,11 +6,11 @@
 
 Mini-app para o **Amazfit T-Rex 3** (Zepp OS 4.x, API_LEVEL 4.0, tela redonda 480×480). Ele:
 
-1. **Sincroniza ao abrir** (com até 3 tentativas por música se a conexão cair): pede ao celular (app Zepp) o `manifest.json` do servidor `trex-sync`, compara com o que já está no relógio, baixa **só as faixas novas**, apaga as que saíram das playlists e recupera arquivos que chegaram com o app fechado.
+1. **Sincroniza ao abrir** (com até 3 tentativas por música se a conexão cair): pede ao celular (app Zepp) o `manifest.json` do servidor `spotifiBR`, compara com o que já está no relógio, baixa **só as faixas novas**, apaga as que saíram das playlists e recupera arquivos que chegaram com o app fechado.
 2. **Toca offline**, por playlist, em ordem ou aleatório. A reprodução roda num *App Service* e continua com a tela apagada e depois que você sai do app.
 
 ```
-PC: python -m trex_sync servir ──HTTP (Wi-Fi)──> Celular: app Zepp (side service)
+PC: python -m spotifibr servir ──HTTP (Wi-Fi)──> Celular: app Zepp (side service)
                                                     │  baixa o MP3
                                                     ▼  TransferFile (Bluetooth)
                                                  Relógio: spotifiBR → /data/music/<id>.mp3
@@ -43,7 +43,7 @@ PC: python -m trex_sync servir ──HTTP (Wi-Fi)──> Celular: app Zepp (side
    zeus preview      # escolha o T-Rex 3; aparece um QR code
    ```
 5. No app Zepp: Perfil → Developer Mode → Scan, e leia o QR. O app é instalado no relógio.
-6. No app Zepp: Perfil → T-Rex 3 → Apps → spotifiBR → Configurações. Preencha o **endereço** e o **token** que o `python -m trex_sync servir` mostra. A tela mostra se a configuração é válida e se a conexão é cifrada.
+6. No app Zepp: Perfil → T-Rex 3 → Apps → spotifiBR → Configurações. Preencha o **endereço** e o **token** que o `python -m spotifibr servir` mostra. A tela mostra se a configuração é válida e se a conexão é cifrada.
 
 Segurança: veja [`../SECURITY.md`](../SECURITY.md). O app nunca recebe credenciais do Spotify; o token só dá acesso às músicas que o seu PC serve.
 
@@ -60,7 +60,7 @@ Funciona pelo **modo desenvolvedor do app Zepp**, que existe também no iOS. Nã
 
 ## Uso diário
 
-1. No PC, depois de adicionar músicas no Spotify: `python -m trex_sync servir --sync`.
+1. No PC, depois de adicionar músicas no Spotify: `python -m spotifibr servir --sync`.
 2. No relógio, abra o **spotifiBR**. Ele baixa as novas sozinho. Deixe o app aberto até aparecer "Sincronização concluída" (a tela fica acesa durante a transferência).
 3. Escolha uma playlist e toque **Tocar** ou **Aleatório**. Conecte os fones Bluetooth antes, pelo menu do próprio relógio.
 

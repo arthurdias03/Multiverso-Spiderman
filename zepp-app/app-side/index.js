@@ -1,6 +1,6 @@
 /**
  * Side Service (roda dentro do app Zepp no celular).
- * Busca o manifesto no servidor do trex-sync, baixa os MP3 e transfere ao relógio, um por vez.
+ * Busca o manifesto no servidor do spotifiBR Desktop, baixa os MP3 e transfere ao relógio, um por vez.
  */
 import { BaseSideService, settingsLib } from '@zeppos/zml/base-side'
 import { checkServerUrl, checkToken, sanitizeManifest, isValidId, isSafeRelPath, encodePath } from '../lib/validate'

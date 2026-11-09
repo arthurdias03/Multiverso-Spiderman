@@ -1,4 +1,4 @@
-"""CLI: python -m trex_sync [login|sync|confirmar|status]"""
+"""CLI: python -m spotifibr [login|sync|confirmar|status]"""
 
 from __future__ import annotations
 
@@ -99,7 +99,7 @@ def cmd_status(cfg: Config, args) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="trex_sync", description="Playlists do Spotify -> MP3 para Amazfit T-Rex 3")
+    ap = argparse.ArgumentParser(prog="spotifibr", description="Playlists do Spotify -> MP3 para Amazfit T-Rex 3")
     ap.add_argument("-c", "--config", default="config.json")
     sub = ap.add_subparsers(dest="cmd", required=True)
     lg = sub.add_parser("login", help="autoriza acesso às suas playlists do Spotify")

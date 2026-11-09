@@ -205,7 +205,7 @@ class SpotifyClient:
     def access_token(self) -> str:
         tok = self._load()
         if not tok:
-            raise RuntimeError("Não autenticado. Rode: python -m trex_sync login")
+            raise RuntimeError("Não autenticado. Rode: python -m spotifibr login")
         if time.time() >= tok.get("expires_at", 0):
             self._save(self._post_token({
                 "grant_type": "refresh_token",

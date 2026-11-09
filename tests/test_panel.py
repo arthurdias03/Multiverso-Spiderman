@@ -7,7 +7,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from trex_sync.panel import Engine, make_panel
+from spotifibr.panel import Engine, make_panel
 
 
 class TestPanel(unittest.TestCase):

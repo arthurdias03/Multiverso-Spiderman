@@ -1,4 +1,4 @@
-# trex-sync + spotifiBR: playlists do Spotify offline no Amazfit T-Rex 3
+# spotifiBR: playlists do Spotify offline no Amazfit T-Rex 3
 
 ![Telas do spotifiBR](docs/telas/telas.png)
 
@@ -8,10 +8,10 @@ O projeto tem duas partes:
 
 | Parte | Pasta | O que faz |
 |---|---|---|
-| **spotifiBR Desktop / trex-sync** (PC, Python) | `trex_sync/` | Painel no navegador (`spotifibr`) ou linha de comando: lê suas playlists no Spotify, recebe seus arquivos, sincroniza sozinho e serve as músicas para o relógio |
+| **spotifiBR Desktop** (PC, Python) | `spotifibr/` | Painel no navegador (`spotifibr`) ou linha de comando: lê suas playlists no Spotify, recebe seus arquivos, sincroniza sozinho e serve as músicas para o relógio |
 | **spotifiBR** (relógio, Zepp OS) | `zepp-app/` | Ao abrir no relógio, baixa só as músicas novas pelo app Zepp e toca offline, inclusive em segundo plano. Veja [`zepp-app/README.md`](zepp-app/README.md) |
 
-Com o app do relógio instalado, o fluxo vira: `python -m trex_sync servir --sync` no PC → abrir o spotifiBR no relógio. O passo manual de transferir pelo app Zepp e o `confirmar` deixam de existir.
+Com o app do relógio instalado, o fluxo vira: `python -m spotifibr servir --sync` no PC → abrir o spotifiBR no relógio. O passo manual de transferir pelo app Zepp e o `confirmar` deixam de existir.
 
 ## Limites (leia antes)
 
@@ -54,16 +54,16 @@ cp config.example.json config.json
 ## Uso
 
 ```bash
-python -m trex_sync login       # uma vez: abre o navegador para autorizar
-python -m trex_sync sync        # gera saida/_PARA_TRANSFERIR com as faixas novas
+python -m spotifibr login       # uma vez: abre o navegador para autorizar
+python -m spotifibr sync        # gera saida/_PARA_TRANSFERIR com as faixas novas
 # -> copie a pasta para o celular e transfira pelo app Zepp:
 #    Perfil > T-Rex 3 > Música > Transferir (relógio no Wi-Fi acelera)
-python -m trex_sync confirmar   # marca como transferidas; o próximo sync só traz novidades
-python -m trex_sync status
-python -m trex_sync servir --sync   # para o app spotifiBR do relógio (mesmo Wi-Fi do celular)
+python -m spotifibr confirmar   # marca como transferidas; o próximo sync só traz novidades
+python -m spotifibr status
+python -m spotifibr servir --sync   # para o app spotifiBR do relógio (mesmo Wi-Fi do celular)
 ```
 
-Para o app do relógio, use `mp3_bitrate` de 96k a 128k: a transferência por Bluetooth é lenta. O token do servidor é gerado automaticamente (`python -m trex_sync novo-token` troca). Veja [SECURITY.md](SECURITY.md) para o modelo de segurança e o acesso cifrado via Tailscale.
+Para o app do relógio, use `mp3_bitrate` de 96k a 128k: a transferência por Bluetooth é lenta. O token do servidor é gerado automaticamente (`python -m spotifibr novo-token` troca). Veja [SECURITY.md](SECURITY.md) para o modelo de segurança e o acesso cifrado via Tailscale.
 
 Se você rodar `sync` de novo sem `confirmar`, as pendentes continuam pendentes. Nada é duplicado.
 

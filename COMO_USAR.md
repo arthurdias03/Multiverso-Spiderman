@@ -10,7 +10,7 @@ O **Spotify diz quais músicas** vão para o relógio (suas playlists). **O áud
 
 ```
 Spotify (suas playlists) ─┐
-                          ├─> PC: trex-sync ──Wi-Fi──> iPhone: app Zepp ──Bluetooth──> Relógio: spotifiBR
+                          ├─> PC: spotifiBR ──Wi-Fi──> iPhone: app Zepp ──Bluetooth──> Relógio: spotifiBR
 Seus arquivos de música ──┘
 ```
 
@@ -22,14 +22,14 @@ O Spotify não permite exportar o áudio: ele é criptografado e só toca dentro
 |---|---|---|---|
 | Seus arquivos (CDs, downloads antigos) | já tem | varia | Coloque na pasta definida em `library_dirs` |
 | **Bandcamp** | compra por faixa/álbum | MP3 320k ou FLAC | Sem proteção; o artista recebe a maior parte |
-| **Compras na iTunes Store** (app Apple Music/iTunes) | compra | AAC 256k | Sem proteção; o trex-sync converte para MP3. Músicas da **assinatura** Apple Music são protegidas e **não** servem |
+| **Compras na iTunes Store** (app Apple Music/iTunes) | compra | AAC 256k | Sem proteção; o spotifiBR converte para MP3. Músicas da **assinatura** Apple Music são protegidas e **não** servem |
 | Jamendo, Free Music Archive, Internet Archive | grátis | varia | Músicas liberadas pelos autores |
 
 ### Listas de links (para achar a versão certa, sem baixar nada)
 
 | Arquivo | O que tem | Como gerar |
 |---|---|---|
-| `saida/LINKS_PLAYLISTS.txt` + `.csv` | **Todas** as músicas das suas playlists | Painel → **Gerar links de todas as músicas**, ou `python -m trex_sync links` |
+| `saida/LINKS_PLAYLISTS.txt` + `.csv` | **Todas** as músicas das suas playlists | Painel → **Gerar links de todas as músicas**, ou `python -m spotifibr links` |
 | `saida/_FALTANDO.txt` + `.csv` | Só as que ainda **não estão** na sua biblioteca | Automático a cada sincronização |
 
 Cada música vem com:
@@ -48,7 +48,7 @@ Em vez de digitar comandos, abra o painel:
 
 ```bash
 pip install -e ".[tags]"
-spotifibr          # ou: python -m trex_sync painel
+spotifibr          # ou: python -m spotifibr painel
 ```
 
 Ele abre no navegador, só no seu computador (`127.0.0.1`, com uma chave aleatória por sessão). Pelo painel você:
@@ -76,7 +76,7 @@ Os passos abaixo continuam valendo para quem preferir a linha de comando.
 5. No `config.json`, preencha:
    - `playlists`: links das playlists, ou `"liked"` para as Músicas Curtidas;
    - `library_dirs`: pasta onde estão seus arquivos de música.
-6. `python -m trex_sync login`: o navegador abre e você autoriza. Só pede permissão de leitura.
+6. `python -m spotifibr login`: o navegador abre e você autoriza. Só pede permissão de leitura.
 
 **Instalar o app no relógio pelo iPhone:**
 
@@ -95,7 +95,7 @@ Os passos abaixo continuam valendo para quem preferir a linha de comando.
 
 **Ligar o app ao seu PC:**
 
-11. No computador: `python -m trex_sync servir --sync`. Ele mostra o **Endereço** e o **Token**.
+11. No computador: `python -m spotifibr servir --sync`. Ele mostra o **Endereço** e o **Token**.
 12. App Zepp → Perfil → T-Rex 3 → Apps → spotifiBR → Configurações. Cole o endereço e o token; o status deve ficar verde.
 13. Na primeira sincronização, o iPhone pergunta se o Zepp pode acessar a rede local: **Permitir**.
 
@@ -103,7 +103,7 @@ Os passos abaixo continuam valendo para quem preferir a linha de comando.
 
 1. Adicione músicas às suas playlists no Spotify, como sempre.
 2. Se alguma música nova ainda não estiver nos seus arquivos, ela aparece em `saida/_FALTANDO.txt`. Compre ou baixe de uma fonte legal e coloque na pasta da sua biblioteca. O nome `Artista - Título.mp3` ajuda, mas com as tags preenchidas o nome não importa.
-3. No computador: `python -m trex_sync servir --sync`.
+3. No computador: `python -m spotifibr servir --sync`.
 4. No relógio, abra o **spotifiBR**. Ele baixa sozinho só o que é novo:
    - mostra o progresso (`3/8 Nome da música, enviando 60%`);
    - tenta de novo até 3 vezes se a conexão cair;

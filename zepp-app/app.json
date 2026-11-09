@@ -6,8 +6,8 @@
     "appType": "app",
     "version": { "code": 1, "name": "0.1.0" },
     "icon": "icon.png",
-    "vender": "trex-sync",
-    "description": "Playlists do Spotify offline no relógio, sincronizadas pelo trex-sync"
+    "vender": "spotifiBR",
+    "description": "Playlists do Spotify offline no relógio, sincronizadas pelo spotifiBR Desktop"
   },
   "permissions": ["device:os.bg_service"],
   "runtime": {

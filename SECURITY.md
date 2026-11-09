@@ -1,4 +1,4 @@
-# Segurança: trex-sync + spotifiBR
+# Segurança: spotifiBR
 
 ## O que proteger
 
@@ -19,7 +19,7 @@ Princípio do projeto: **o celular e o relógio nunca recebem credenciais do Spo
 - Escopos mínimos e só de leitura: `playlist-read-private`, `playlist-read-collaborative`, `user-library-read`.
 - Arquivo de token gravado de forma atômica com permissão 0600. Arquivos antigos são corrigidos para 0600.
 
-**Servidor (`python -m trex_sync servir`)**
+**Servidor (`python -m spotifibr servir`)**
 - Token obrigatório de 256 bits, gerado automaticamente. O servidor recusa tokens com menos de 32 caracteres.
 - O token vai **só no cabeçalho** `X-Trex-Token`. Token na URL é recusado, porque URLs acabam em logs e histórico.
 - Comparação em tempo constante e bloqueio de 15 min por IP após 10 tentativas erradas.
@@ -59,12 +59,12 @@ Tailscale cria uma rede privada cifrada entre os seus aparelhos. Com ele você t
 
 1. Instale o Tailscale no PC e no iPhone, com a mesma conta.
 2. No `config.json`, defina `"server_bind": "127.0.0.1"`.
-3. No PC: `python -m trex_sync servir` e, em outro terminal, `tailscale serve --bg 8765`.
+3. No PC: `python -m spotifibr servir` e, em outro terminal, `tailscale serve --bg 8765`.
 4. No app Zepp, use o endereço `https://<nome-do-pc>.<sua-tailnet>.ts.net`.
 
 Use `tailscale serve`, que deixa o acesso só na sua rede privada. **Nunca use `tailscale funnel`**: ele publica o servidor na internet.
 
 ## Se algo vazar
 
-- **Celular perdido ou token exposto:** `python -m trex_sync novo-token` invalida o token antigo na hora.
+- **Celular perdido ou token exposto:** `python -m spotifibr novo-token` invalida o token antigo na hora.
 - **Arquivo `.spotify_token.json` exposto:** em spotify.com/account/apps, remova o acesso do app e apague o arquivo. Depois rode `login` de novo.

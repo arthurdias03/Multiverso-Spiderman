@@ -3,9 +3,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from trex_sync.library import Library, LocalFile, normalize
-from trex_sync.spotify import Track, parse_playlist_id, track_from_json
-from trex_sync.sync import TRANSFER_DIR, State, confirm_transfer, sync_playlist, write_missing
+from spotifibr.library import Library, LocalFile, normalize
+from spotifibr.spotify import Track, parse_playlist_id, track_from_json
+from spotifibr.sync import TRANSFER_DIR, State, confirm_transfer, sync_playlist, write_missing
 
 
 def T(i, artist, title):
@@ -83,7 +83,7 @@ class TestSync(unittest.TestCase):
         script.write_text("import sys,pathlib;pathlib.Path(sys.argv[1],sys.argv[2]+' - '+sys.argv[3]+'.mp3').write_bytes(b'x')")
         import sys
         cmd = [sys.executable, str(script), "{dir}", "{artist}", "{title}"]
-        from trex_sync.sync import run_downloader
+        from spotifibr.sync import run_downloader
         import unittest.mock as um
         with um.patch("subprocess.run") as run:
             run_downloader(["x", "{dir}/{artist}.{output-ext}"], T("7", "A", "B"), dl)
@@ -103,8 +103,8 @@ class TestManifestAndServer(unittest.TestCase):
     def setUp(self):
         import threading
 
-        from trex_sync.server import make_server
-        from trex_sync.sync import write_manifest
+        from spotifibr.server import make_server
+        from spotifibr.sync import write_manifest
 
         tmp = Path(tempfile.mkdtemp())
         lib = tmp / "lib"
@@ -159,7 +159,7 @@ class TestManifestAndServer(unittest.TestCase):
             self.assertEqual(self.get(path, self.TOKEN)[0], 404, path)
 
     def test_symlink_in_manifest_is_blocked(self):
-        from trex_sync.server import Allowlist
+        from spotifibr.server import Allowlist
 
         m = json.loads((self.out / "manifest.json").read_text())
         m["playlists"][0]["tracks"].append({"id": "9", "t": "x", "a": "y", "p": "Rock/link.mp3", "s": 1})
@@ -167,7 +167,7 @@ class TestManifestAndServer(unittest.TestCase):
         self.assertIsNone(Allowlist(self.out).resolve("Rock/link.mp3"))
 
     def test_bruteforce_lockout(self):
-        from trex_sync import server
+        from spotifibr import server
 
         for _ in range(server.MAX_FAILS):
             self.get("/manifest.json", "chute")
@@ -177,7 +177,7 @@ class TestManifestAndServer(unittest.TestCase):
         import urllib.error
         import urllib.request
 
-        from trex_sync.server import make_server
+        from spotifibr.server import make_server
 
         req = urllib.request.Request(self.base + "/manifest.json", data=b"x", method="POST")
         with self.assertRaises(urllib.error.HTTPError) as e:
@@ -189,7 +189,7 @@ class TestManifestAndServer(unittest.TestCase):
 
 class TestSecurityHelpers(unittest.TestCase):
     def test_local_clients(self):
-        from trex_sync.server import is_local_client
+        from spotifibr.server import is_local_client
 
         for ip in ["127.0.0.1", "192.168.0.5", "10.1.2.3", "172.16.0.9", "100.101.102.103", "::1", "fe80::1"]:
             self.assertTrue(is_local_client(ip), ip)
@@ -200,7 +200,7 @@ class TestSecurityHelpers(unittest.TestCase):
         import os
         import stat
 
-        from trex_sync.server import load_or_create_token
+        from spotifibr.server import load_or_create_token
 
         tmp = Path(tempfile.mkdtemp())
         tok = load_or_create_token("TROQUE-POR-UMA-SENHA-LONGA", tmp / ".tok")
@@ -214,7 +214,7 @@ class TestSecurityHelpers(unittest.TestCase):
         import os
         import stat
 
-        from trex_sync.spotify import SpotifyClient
+        from spotifibr.spotify import SpotifyClient
 
         tmp = Path(tempfile.mkdtemp())
         sp = SpotifyClient("cid", tmp / "tok.json")
@@ -224,8 +224,8 @@ class TestSecurityHelpers(unittest.TestCase):
             SpotifyClient("cid", tmp / "x.json", redirect_uri="http://192.168.0.2:8888/callback")
 
     def test_ids_and_names(self):
-        from trex_sync.spotify import parse_playlist_id, track_from_json
-        from trex_sync.sync import safe_name
+        from spotifibr.spotify import parse_playlist_id, track_from_json
+        from spotifibr.sync import safe_name
 
         self.assertIsNone(track_from_json({"id": "../../etc", "name": "x", "type": "track"}))
         with self.assertRaises(ValueError):
@@ -251,7 +251,7 @@ class TestSecurityHelpers(unittest.TestCase):
     def test_downloader_argument_injection(self):
         import unittest.mock as um
 
-        from trex_sync.sync import run_downloader
+        from spotifibr.sync import run_downloader
 
         evil = Track("abc", "--exec=rm -rf ~", ("-oProxyCommand=x",), "", 0, "https://open.spotify.com/track/abc")
         with um.patch("subprocess.run") as run:
@@ -278,7 +278,7 @@ class TestLinks(unittest.TestCase):
     def test_write_links_txt_and_csv(self):
         import csv
 
-        from trex_sync.links import write_links
+        from spotifibr.links import write_links
 
         t = Track("abc123", "Faixa de Exemplo", ("Banda Fictícia",), "Álbum Demo", 222000,
                   "https://open.spotify.com/track/abc123", "BRXYZ1900001", "2019")
@@ -298,8 +298,8 @@ class TestLinks(unittest.TestCase):
     def test_run_links_with_fake_spotify(self):
         import unittest.mock as um
 
-        from trex_sync.config import Config
-        from trex_sync.runner import run_links
+        from spotifibr.config import Config
+        from spotifibr.runner import run_links
 
         tmp = Path(tempfile.mkdtemp())
         (tmp / "config.json").write_text(json.dumps({"spotify_client_id": "cid", "playlists": ["liked"], "output_dir": "saida"}))
@@ -308,7 +308,7 @@ class TestLinks(unittest.TestCase):
         fake.playlist_name.return_value = "Favoritas (exemplo)"
         fake.playlist_tracks.return_value = [T("a1", "Banda Fictícia", "Faixa 1"), T("a1", "Banda Fictícia", "Faixa 1"),
                                              T("a2", "Os Exemplares", "Faixa 2")]
-        with um.patch("trex_sync.runner.SpotifyClient", return_value=fake):
+        with um.patch("spotifibr.runner.SpotifyClient", return_value=fake):
             txt, _ = run_links(cfg, log=lambda m: None)
         body = txt.read_text(encoding="utf-8")
         self.assertIn("2 música(s)", body)  # duplicata removida

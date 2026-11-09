@@ -152,7 +152,7 @@ class Guard:
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
-    server_version = "trex-sync"
+    server_version = "spotifiBR"
     sys_version = ""
     timeout = 30  # evita conexões penduradas (slowloris)
     token: bytes = b""
@@ -251,7 +251,7 @@ def serve(directory: Path, port: int, token: str, bind: str = "auto", allow_publ
           tls_cert: str = "", tls_key: str = "") -> None:
     directory = Path(directory)
     if not (directory / "manifest.json").exists():
-        raise RuntimeError("manifest.json não existe. Rode 'python -m trex_sync sync' antes.")
+        raise RuntimeError("manifest.json não existe. Rode 'python -m spotifibr sync' antes.")
     host = lan_ip() if bind == "auto" else bind
     if host in ("0.0.0.0", "::"):
         print("AVISO: escutando em todas as interfaces. Prefira server_bind \"auto\".")
@@ -262,7 +262,7 @@ def serve(directory: Path, port: int, token: str, bind: str = "auto", allow_publ
     print("No app Zepp > spotifiBR > Configurações, use:")
     print(f"   Endereço: {scheme}://{shown}:{port}")
     print(f"   Token:    {token}")
-    print("Não compartilhe o token. Para trocar: python -m trex_sync novo-token")
+    print("Não compartilhe o token. Para trocar: python -m spotifibr novo-token")
     if scheme == "http":
         print("Sem TLS: use só na sua rede de casa (nunca em Wi-Fi público).")
     print("Ctrl+C para parar.")
